@@ -9,8 +9,15 @@ import { useUser } from "@/components/user-context-provider"
 
 export function RoleSelection() {
   const [selectedRole, setSelectedRole] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
   const { user, logout } = useUser()
+
+  // Debug logging to help identify issues
+  useEffect(() => {
+    console.log("Current selected role:", selectedRole)
+    console.log("User context:", user)
+  }, [selectedRole, user])
 
   // If user is already logged in, redirect to appropriate dashboard
   useEffect(() => {
@@ -25,31 +32,57 @@ export function RoleSelection() {
 
   // Check if there's a previously selected role
   useEffect(() => {
-    const storedRole = localStorage.getItem("userRole")
-    if (storedRole) {
-      setSelectedRole(storedRole)
+    try {
+      const storedRole = localStorage.getItem("userRole")
+      console.log("Retrieved stored role:", storedRole)
+      if (storedRole) {
+        setSelectedRole(storedRole)
+      }
+    } catch (error) {
+      console.error("Error accessing localStorage:", error)
     }
   }, [])
 
   const handleRoleSelect = (role: string) => {
+    console.log("Role selected:", role)
     setSelectedRole(role)
     // Store the role in localStorage
-    localStorage.setItem("userRole", role)
+    try {
+      localStorage.setItem("userRole", role)
+    } catch (error) {
+      console.error("Error storing role in localStorage:", error)
+    }
   }
 
   const handleContinue = () => {
-    if (selectedRole) {
-      // Store the role in localStorage
+    if (!selectedRole) {
+      console.error("Attempted to continue without selecting a role")
+      return
+    }
+
+    console.log("Continue clicked with role:", selectedRole)
+    setIsLoading(true)
+
+    // Store the role in localStorage
+    try {
       localStorage.setItem("userRole", selectedRole)
 
       // If user is already logged in but changing roles, log them out first
       if (user) {
         logout()
         // Wait a bit before redirecting to login
-        setTimeout(() => router.push("/login"), 100)
+        setTimeout(() => {
+          console.log("Redirecting to login after logout")
+          router.push("/login")
+        }, 100)
       } else {
+        // Direct navigation without timeout
+        console.log("Redirecting to login")
         router.push("/login")
       }
+    } catch (error) {
+      console.error("Error in handleContinue:", error)
+      setIsLoading(false)
     }
   }
 
@@ -73,6 +106,7 @@ export function RoleSelection() {
             variant={selectedRole === "user" ? "default" : "outline"}
             className={`h-20 justify-start gap-4 ${selectedRole === "user" ? "bg-red-600 hover:bg-red-700 text-white border-2 border-red-600" : "border-2 hover:border-red-600 hover:text-red-600"}`}
             onClick={() => handleRoleSelect("user")}
+            data-testid="user-role-button"
           >
             <Utensils className="h-6 w-6 shrink-0" />
             <div className="flex flex-col items-start">
@@ -85,6 +119,7 @@ export function RoleSelection() {
             variant={selectedRole === "provider" ? "default" : "outline"}
             className={`h-20 justify-start gap-4 ${selectedRole === "provider" ? "bg-red-600 hover:bg-red-700 text-white border-2 border-red-600" : "border-2 hover:border-red-600 hover:text-red-600"}`}
             onClick={() => handleRoleSelect("provider")}
+            data-testid="provider-role-button"
           >
             <Store className="h-6 w-6 shrink-0" />
             <div className="flex flex-col items-start">
@@ -94,8 +129,13 @@ export function RoleSelection() {
           </Button>
         </CardContent>
         <CardFooter>
-          <Button className="w-full bg-red-600 hover:bg-red-700" disabled={!selectedRole} onClick={handleContinue}>
-            Continue <ArrowRight className="ml-2 h-4 w-4" />
+          <Button
+            className="w-full bg-red-600 hover:bg-red-700"
+            disabled={!selectedRole || isLoading}
+            onClick={handleContinue}
+            data-testid="continue-button"
+          >
+            {isLoading ? "Loading..." : "Continue"} {!isLoading && <ArrowRight className="ml-2 h-4 w-4" />}
           </Button>
         </CardFooter>
       </Card>
