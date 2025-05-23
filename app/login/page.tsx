@@ -1,8 +1,8 @@
-import { LoginForm } from "@/components/login-form"
+import LoginForm from "@/components/auth/login-form"
 
 export default function LoginPage() {
   return (
-    <div className="container flex items-center justify-center min-h-screen py-12">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <LoginForm />
     </div>
   )
