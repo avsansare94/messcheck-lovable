@@ -64,11 +64,20 @@ export async function middleware(request: NextRequest) {
     }
 
     // Public routes that don't require authentication
-    const publicRoutes = ["/", "/login", "/admin-login", "/signup", "/about", "/contact", "/unauthorized"]
-    const isPublicRoute = publicRoutes.includes(pathname)
+    const publicRoutes = [
+      "/",
+      "/login",
+      "/admin-login",
+      "/signup",
+      "/about",
+      "/contact",
+      "/unauthorized",
+      "/onboarding",
+    ]
+    const isPublicRoute = publicRoutes.includes(pathname) || pathname.startsWith("/auth/")
 
     // Protected routes that require authentication
-    const protectedRoutes = ["/admin", "/zeus", "/provider", "/home", "/dashboard", "/profile", "/settings"]
+    const protectedRoutes = ["/admin", "/zeus", "/provider", "/user", "/home", "/dashboard", "/profile", "/settings"]
     const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route))
 
     // Handle root path specially to avoid redirect loops
@@ -83,23 +92,31 @@ export async function middleware(request: NextRequest) {
     }
 
     // Handle authenticated users
-    if (user && userProfile) {
+    if (user) {
       // Redirect authenticated users from login pages to their dashboard
       if (pathname === "/login" || pathname === "/admin-login") {
-        const redirectUrl = getRoleBasedRedirect(userProfile.role)
-        return NextResponse.redirect(new URL(redirectUrl, request.url))
+        if (userProfile?.role) {
+          const redirectUrl = getRoleBasedRedirect(userProfile.role)
+          return NextResponse.redirect(new URL(redirectUrl, request.url))
+        }
+        // If no profile yet, redirect to onboarding
+        return NextResponse.redirect(new URL("/onboarding", request.url))
       }
 
       // Role-based route protection
-      if (pathname.startsWith("/admin") && userProfile.role !== "admin") {
+      if (pathname.startsWith("/admin") && userProfile?.role !== "admin") {
         return NextResponse.redirect(new URL("/unauthorized", request.url))
       }
 
-      if (pathname.startsWith("/zeus") && userProfile.role !== "zeus") {
+      if (pathname.startsWith("/zeus") && userProfile?.role !== "zeus") {
         return NextResponse.redirect(new URL("/unauthorized", request.url))
       }
 
-      if (pathname.startsWith("/provider") && userProfile.role !== "provider") {
+      if (pathname.startsWith("/provider") && userProfile?.role !== "provider") {
+        return NextResponse.redirect(new URL("/unauthorized", request.url))
+      }
+
+      if (pathname.startsWith("/user") && userProfile?.role !== "user") {
         return NextResponse.redirect(new URL("/unauthorized", request.url))
       }
     }
@@ -131,7 +148,7 @@ function getRoleBasedRedirect(role: string): string {
       return "/provider/dashboard"
     case "user":
     default:
-      return "/dashboard"
+      return "/user/dashboard"
   }
 }
 

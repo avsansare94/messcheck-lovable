@@ -34,6 +34,7 @@ export function ZomatoOnboardingFlow() {
   const [error, setError] = useState("")
   const [tags, setTags] = useState<string[]>([])
   const [tagInput, setTagInput] = useState("")
+  const [debugInfo, setDebugInfo] = useState<any>(null)
 
   const [formData, setFormData] = useState({
     full_name: "",
@@ -160,15 +161,28 @@ export function ZomatoOnboardingFlow() {
     setError("")
 
     try {
+      // Get current user
       const {
         data: { user },
+        error: userError,
       } = await supabase.auth.getUser()
-      if (!user) throw new Error("No user found")
+
+      if (userError) throw new Error(`Auth error: ${userError.message}`)
+      if (!user) throw new Error("No authenticated user found")
 
       // Check if user already has admin role
-      const { data: existingProfile } = await supabase.from("profiles").select("role").eq("id", user.id).single()
+      const { data: existingProfile, error: profileError } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .single()
 
-      // If user is already an admin, preserve that role
+      if (profileError && profileError.code !== "PGRST116") {
+        // PGRST116 is "no rows returned" which is fine for new users
+        throw new Error(`Profile fetch error: ${profileError.message}`)
+      }
+
+      // Determine role - preserve admin role if it exists
       const role = existingProfile?.role === "admin" ? "admin" : selectedRole
 
       // Create profile data object based on actual database schema
@@ -192,24 +206,37 @@ export function ZomatoOnboardingFlow() {
         updated_at: new Date().toISOString(),
       }
 
-      // Remove any fields that don't exist in the database schema
-      const { error } = await supabase.from("profiles").update(profileData).eq("id", user.id)
+      // Save debug info for troubleshooting
+      setDebugInfo({ profileData, existingProfile })
 
-      if (error) throw error
+      // Update the profile
+      const { error: updateError } = await supabase.from("profiles").upsert(profileData)
 
-      toast.success("Welcome to MessCheck, your profile is set!")
+      if (updateError) {
+        throw new Error(`Profile update error: ${updateError.message}`)
+      }
 
-      // Role-based redirect
+      toast.success("Profile completed successfully!")
+
+      // Explicitly set the role in session metadata to ensure middleware picks it up
+      await supabase.auth.updateUser({
+        data: { role: role },
+      })
+
+      // Force a small delay to ensure the database update completes
+      await new Promise((resolve) => setTimeout(resolve, 500))
+
+      // Role-based redirect with direct navigation
       if (role === "admin") {
-        router.push("/admin/dashboard")
+        window.location.href = "/admin/dashboard"
       } else if (role === "provider") {
-        router.push("/provider/dashboard")
+        window.location.href = "/provider/dashboard"
       } else {
-        router.push("/dashboard") // Changed from /user/dashboard to match middleware
+        window.location.href = "/user/dashboard"
       }
     } catch (error: any) {
       console.error("Profile update error:", error)
-      setError(error.message || "Failed to save profile")
+      setError(`Error: ${error.message}`)
     } finally {
       setIsLoading(false)
     }
