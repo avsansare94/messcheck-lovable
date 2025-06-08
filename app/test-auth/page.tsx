@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { createClient } from "@/lib/supabase/client"
+import { supabase } from "@/lib/supabase"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Loader2, CheckCircle2, XCircle, Shield } from "lucide-react"
@@ -16,7 +16,6 @@ interface AuthTestResult {
 export default function AuthTestPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [testResults, setTestResults] = useState<AuthTestResult[]>([])
-  const supabase = createClient()
 
   const updateTestResult = (testName: string, status: "success" | "error", message: string, details?: any) => {
     setTestResults((prev) =>

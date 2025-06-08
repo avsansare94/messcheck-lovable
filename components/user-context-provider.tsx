@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react"
 import { setUserInfo, clearUserInfo } from "@/lib/sentry"
 import { useRouter, usePathname } from "next/navigation"
+import { clearAuthState } from "@/lib/supabase"
 
 // Define the user type
 type User = {
@@ -64,19 +65,16 @@ export function UserContextProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const logout = () => {
+  const logout = async () => {
     console.log("Logging out user")
     setUserState(null)
     clearUserInfo()
 
-    try {
-      // Clear user data cookie
-      document.cookie = "userData=; path=/; max-age=0"
-      // Clear localStorage
-      localStorage.removeItem("user")
-    } catch (error) {
-      console.error("Error clearing user data:", error)
-    }
+    // Use the centralized auth state clearing function
+    await clearAuthState()
+
+    // Redirect to login
+    router.push("/login")
   }
 
   // On mount, try to get user from local storage and cookies

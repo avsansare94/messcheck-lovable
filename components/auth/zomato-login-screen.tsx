@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { createClient } from "@/lib/supabase/client"
+import { supabase } from "@/lib/supabase"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Loader2, MapPin, Utensils } from "lucide-react"
@@ -11,7 +11,6 @@ import { useToast } from "@/hooks/use-toast"
 export function ZomatoLoginScreen() {
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
-  const supabase = createClient()
   const { toast } = useToast()
 
   const handleGoogleLogin = async () => {

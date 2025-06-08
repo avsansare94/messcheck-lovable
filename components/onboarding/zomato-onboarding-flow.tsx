@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { createClient } from "@/lib/supabase/client"
+import { supabase } from "@/lib/supabase"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -26,7 +26,6 @@ interface LocationData {
 
 export function ZomatoOnboardingFlow() {
   const router = useRouter()
-  const supabase = createClient()
   const [isLoading, setIsLoading] = useState(false)
   const [locationLoading, setLocationLoading] = useState(false)
   const [locationCaptured, setLocationCaptured] = useState(false)
@@ -34,18 +33,17 @@ export function ZomatoOnboardingFlow() {
   const [error, setError] = useState("")
   const [tags, setTags] = useState<string[]>([])
   const [tagInput, setTagInput] = useState("")
-  const [debugInfo, setDebugInfo] = useState<any>(null)
 
   const [formData, setFormData] = useState({
     full_name: "",
     gender: "",
     age: "",
-    institution: "", // Changed from institution_name to match DB schema
+    institution: "",
     institution_type: "",
     food_preference: "",
     mess_name: "",
-    phone_number: "", // This exists in both user and provider forms now
-    address: "", // Added to match DB schema
+    phone_number: "",
+    address: "",
     city: "",
     state: "",
     pincode: "",
@@ -68,7 +66,7 @@ export function ZomatoOnboardingFlow() {
       captureLocation()
     }
     initializeData()
-  }, [supabase])
+  }, [])
 
   const reverseGeocode = async (lat: number, lng: number): Promise<LocationData> => {
     try {
@@ -155,6 +153,13 @@ export function ZomatoOnboardingFlow() {
     }
   }
 
+  const formatLocationForPostGIS = (lat: number, lng: number): string => {
+    // PostGIS POINT format: POINT(longitude latitude)
+    // Note: longitude comes first, then latitude
+    // SRID=4326 is the standard WGS84 coordinate system
+    return `POINT(${lng} ${lat})`
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
@@ -190,49 +195,109 @@ export function ZomatoOnboardingFlow() {
         id: user.id,
         email: user.email,
         full_name: formData.full_name,
-        role: role, // Use the determined role
+        role: role,
         gender: formData.gender || null,
         age: formData.age ? Number.parseInt(formData.age) : null,
         institution: selectedRole === "user" ? formData.institution : null,
         institution_type: selectedRole === "user" ? formData.institution_type : null,
         food_preference: formData.food_preference,
-        phone_number: formData.phone_number, // Save phone number for both user types
+        phone_number: formData.phone_number,
         address: formData.address || null,
         city: formData.city,
         state: formData.state,
         pincode: formData.pincode,
-        // Store location as text since we don't have PostGIS
-        geo_location: formData.geo_location ? `${formData.geo_location.lat},${formData.geo_location.lng}` : null,
         updated_at: new Date().toISOString(),
       }
 
-      // Save debug info for troubleshooting
-      setDebugInfo({ profileData, existingProfile })
+      // Handle geo_location with proper PostGIS formatting
+      let updateSuccess = false
 
-      // Update the profile
-      const { error: updateError } = await supabase.from("profiles").upsert(profileData)
+      if (formData.geo_location) {
+        try {
+          // Format as PostGIS POINT with longitude first, then latitude
+          const geoLocationValue = formatLocationForPostGIS(formData.geo_location.lat, formData.geo_location.lng)
+          console.log("Formatted geo_location:", geoLocationValue)
 
-      if (updateError) {
-        throw new Error(`Profile update error: ${updateError.message}`)
+          // Try using the RPC function first for proper PostGIS handling
+          const { error: rpcError } = await supabase.rpc("update_profile_with_location", {
+            user_id: user.id,
+            profile_data: profileData,
+            location_point: geoLocationValue,
+          })
+
+          if (rpcError) {
+            console.warn("RPC update failed, trying direct SQL approach:", rpcError)
+
+            // Fallback: Try direct SQL update with ST_GeomFromText
+            const { error: sqlError } = await supabase.from("profiles").upsert({
+              ...profileData,
+              geo_location: `ST_GeomFromText('${geoLocationValue}', 4326)`,
+            })
+
+            if (sqlError) {
+              console.warn("Direct SQL update failed, saving without location:", sqlError)
+
+              // Final fallback: Save without geo_location
+              const { error: fallbackError } = await supabase.from("profiles").upsert({
+                ...profileData,
+                geo_location: null,
+              })
+
+              if (fallbackError) {
+                throw new Error(`Profile update error: ${fallbackError.message}`)
+              }
+
+              toast.warning("Profile saved successfully, but location could not be stored")
+            }
+          }
+
+          updateSuccess = true
+        } catch (geoError) {
+          console.warn("Location formatting failed:", geoError)
+
+          // Save without geo_location if formatting fails
+          const { error: fallbackError } = await supabase.from("profiles").upsert({
+            ...profileData,
+            geo_location: null,
+          })
+
+          if (fallbackError) {
+            throw new Error(`Profile update error: ${fallbackError.message}`)
+          }
+
+          toast.warning("Profile saved successfully, but location could not be stored")
+          updateSuccess = true
+        }
+      } else {
+        // No location data, regular update
+        const { error: updateError } = await supabase.from("profiles").upsert(profileData)
+
+        if (updateError) {
+          throw new Error(`Profile update error: ${updateError.message}`)
+        }
+
+        updateSuccess = true
       }
 
-      toast.success("Profile completed successfully!")
+      if (updateSuccess) {
+        toast.success("Profile completed successfully!")
 
-      // Explicitly set the role in session metadata to ensure middleware picks it up
-      await supabase.auth.updateUser({
-        data: { role: role },
-      })
+        // Explicitly set the role in session metadata to ensure middleware picks it up
+        await supabase.auth.updateUser({
+          data: { role: role },
+        })
 
-      // Force a small delay to ensure the database update completes
-      await new Promise((resolve) => setTimeout(resolve, 500))
+        // Force a small delay to ensure the database update completes
+        await new Promise((resolve) => setTimeout(resolve, 1000))
 
-      // Role-based redirect with direct navigation
-      if (role === "admin") {
-        window.location.href = "/admin/dashboard"
-      } else if (role === "provider") {
-        window.location.href = "/provider/dashboard"
-      } else {
-        window.location.href = "/user/dashboard"
+        // Role-based redirect with direct navigation
+        if (role === "admin") {
+          window.location.href = "/admin/dashboard"
+        } else if (role === "provider") {
+          window.location.href = "/provider/dashboard"
+        } else {
+          window.location.href = "/user/dashboard"
+        }
       }
     } catch (error: any) {
       console.error("Profile update error:", error)
@@ -247,7 +312,7 @@ export function ZomatoOnboardingFlow() {
       selectedRole &&
       formData.full_name &&
       formData.food_preference &&
-      formData.phone_number && // Now required for both roles
+      formData.phone_number &&
       formData.city &&
       formData.state &&
       formData.pincode
@@ -619,7 +684,7 @@ export function ZomatoOnboardingFlow() {
                     )}
                   </div>
 
-                  {/* Submit Button - Renamed to "Complete Profile" */}
+                  {/* Submit Button */}
                   <Button
                     type="submit"
                     disabled={!isFormValid() || isLoading}

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { createClient } from "@/lib/supabase/client"
+import { supabase } from "@/lib/supabase"
 import { ZomatoLoginScreen } from "@/components/auth/zomato-login-screen"
 import { Loader2 } from "lucide-react"
 
@@ -10,7 +10,6 @@ export default function HomePage() {
   const [isLoading, setIsLoading] = useState(true)
   const [showLogin, setShowLogin] = useState(false)
   const router = useRouter()
-  const supabase = createClient()
 
   useEffect(() => {
     async function checkAuth() {
@@ -63,7 +62,7 @@ export default function HomePage() {
     }
 
     checkAuth()
-  }, [router, supabase])
+  }, [router])
 
   if (isLoading) {
     return (
