@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { UserDashboard } from "@/components/user-dashboard"
+import { BottomNavigation } from "@/components/bottom-navigation"
 
 export default async function HomePage() {
   const supabase = createClient()
@@ -35,5 +36,10 @@ export default async function HomePage() {
   }
 
   // User role - show user dashboard
-  return <UserDashboard />
+  return (
+    <main className="pb-16">
+      <UserDashboard />
+      <BottomNavigation activeTab="home" />
+    </main>
+  )
 }

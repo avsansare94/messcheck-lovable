@@ -34,6 +34,11 @@ export function ZomatoOnboardingFlow() {
   const [tags, setTags] = useState<string[]>([])
   const [tagInput, setTagInput] = useState("")
 
+  // Add auth state management
+  const [authLoading, setAuthLoading] = useState(true)
+  const [user, setUser] = useState<any>(null)
+  const [authError, setAuthError] = useState("")
+
   const [formData, setFormData] = useState({
     full_name: "",
     gender: "",
@@ -53,20 +58,49 @@ export function ZomatoOnboardingFlow() {
   // Auto-load user data and capture location
   useEffect(() => {
     const initializeData = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-      if (user) {
+      try {
+        setAuthLoading(true)
+        setAuthError("")
+
+        // Get current session first
+        const {
+          data: { session },
+          error: sessionError,
+        } = await supabase.auth.getSession()
+
+        if (sessionError) {
+          console.error("Session error:", sessionError)
+          setAuthError("Authentication session error. Please login again.")
+          router.push("/login")
+          return
+        }
+
+        if (!session || !session.user) {
+          console.error("No active session found")
+          setAuthError("No active session. Please login first.")
+          router.push("/login")
+          return
+        }
+
+        // Set user data
+        setUser(session.user)
         setFormData((prev) => ({
           ...prev,
-          full_name: user.user_metadata?.full_name || user.user_metadata?.name || "",
+          full_name: session.user.user_metadata?.full_name || session.user.user_metadata?.name || "",
         }))
+
+        // Auto-capture location
+        captureLocation()
+      } catch (error: any) {
+        console.error("Initialization error:", error)
+        setAuthError("Failed to initialize. Please try again.")
+      } finally {
+        setAuthLoading(false)
       }
-      // Auto-capture location
-      captureLocation()
     }
+
     initializeData()
-  }, [])
+  }, [router])
 
   const reverseGeocode = async (lat: number, lng: number): Promise<LocationData> => {
     try {
@@ -166,14 +200,10 @@ export function ZomatoOnboardingFlow() {
     setError("")
 
     try {
-      // Get current user
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser()
-
-      if (userError) throw new Error(`Auth error: ${userError.message}`)
-      if (!user) throw new Error("No authenticated user found")
+      // Use the stored user instead of fetching again
+      if (!user) {
+        throw new Error("No authenticated user found. Please login again.")
+      }
 
       // Check if user already has admin role
       const { data: existingProfile, error: profileError } = await supabase
@@ -328,377 +358,405 @@ export function ZomatoOnboardingFlow() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 via-orange-50 to-yellow-50 py-8 px-4">
-      {/* Mobile-First Container - Max Width 400px */}
-      <div className="w-full max-w-sm mx-auto space-y-8">
-        {/* Header */}
-        <div className="text-center space-y-4">
-          <div className="w-20 h-20 bg-gradient-to-br from-red-600 to-orange-600 rounded-3xl mx-auto shadow-2xl flex items-center justify-center">
-            <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2.5}
-                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-              />
-            </svg>
-          </div>
-          <div className="space-y-2">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
-              Complete Your Profile
-            </h1>
-            <p className="text-gray-600">Let's set up your MessCheck experience</p>
-          </div>
+      {/* Show auth loading state */}
+      {authLoading && (
+        <div className="w-full max-w-sm mx-auto">
+          <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-2xl rounded-3xl overflow-hidden">
+            <CardContent className="p-8 text-center">
+              <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-red-600" />
+              <p className="text-gray-600">Initializing your session...</p>
+            </CardContent>
+          </Card>
         </div>
+      )}
 
-        {/* Status Alerts */}
-        {locationLoading && (
-          <Alert className="border-blue-200 bg-blue-50/80 rounded-2xl">
-            <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
-            <AlertDescription className="text-blue-700 font-medium">Capturing your location...</AlertDescription>
+      {/* Show auth error */}
+      {authError && (
+        <div className="w-full max-w-sm mx-auto">
+          <Alert variant="destructive" className="border-red-200 bg-red-50/80 rounded-2xl">
+            <AlertDescription className="text-red-700 font-medium">{authError}</AlertDescription>
           </Alert>
-        )}
+        </div>
+      )}
 
-        {locationCaptured && (
-          <Alert className="border-green-200 bg-green-50/80 rounded-2xl">
-            <CheckCircle2 className="h-4 w-4 text-green-600" />
-            <AlertDescription className="text-green-700 font-medium">Location captured successfully!</AlertDescription>
-          </Alert>
-        )}
+      {/* Show main form only when auth is ready */}
+      {!authLoading && !authError && user && (
+        <div className="w-full max-w-sm mx-auto space-y-8">
+          {/* Header */}
+          <div className="text-center space-y-4">
+            <div className="w-20 h-20 bg-gradient-to-br from-red-600 to-orange-600 rounded-3xl mx-auto shadow-2xl flex items-center justify-center">
+              <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2.5}
+                  d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                />
+              </svg>
+            </div>
+            <div className="space-y-2">
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
+                Complete Your Profile
+              </h1>
+              <p className="text-gray-600">Let's set up your MessCheck experience</p>
+            </div>
+          </div>
 
-        {/* Main Form Card */}
-        <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-2xl rounded-3xl overflow-hidden">
-          <CardContent className="p-8">
-            <form onSubmit={handleSubmit} className="space-y-8">
-              {error && (
-                <Alert variant="destructive" className="border-red-200 bg-red-50/80 rounded-2xl">
-                  <AlertDescription className="text-red-700 font-medium">{error}</AlertDescription>
-                </Alert>
-              )}
+          {/* Status Alerts */}
+          {locationLoading && (
+            <Alert className="border-blue-200 bg-blue-50/80 rounded-2xl">
+              <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+              <AlertDescription className="text-blue-700 font-medium">Capturing your location...</AlertDescription>
+            </Alert>
+          )}
 
-              {/* Role Selection - Step 1 */}
-              <div className="space-y-4">
-                <Label className="text-lg font-semibold text-gray-800">I am a</Label>
-                <div className="grid grid-cols-1 gap-4">
-                  <button
-                    type="button"
-                    onClick={() => setSelectedRole("user")}
-                    className={`p-6 rounded-2xl border-2 transition-all duration-300 ${
-                      selectedRole === "user"
-                        ? "border-red-500 bg-red-50 shadow-lg"
-                        : "border-gray-200 bg-white hover:border-gray-300"
-                    }`}
-                  >
-                    <div className="flex items-center space-x-4">
-                      <User className={`w-8 h-8 ${selectedRole === "user" ? "text-red-600" : "text-gray-400"}`} />
-                      <div className="text-left">
-                        <p className={`font-semibold ${selectedRole === "user" ? "text-red-600" : "text-gray-600"}`}>
-                          Mess User
-                        </p>
-                        <p className="text-xs text-gray-500">Find and book meals</p>
+          {locationCaptured && (
+            <Alert className="border-green-200 bg-green-50/80 rounded-2xl">
+              <CheckCircle2 className="h-4 w-4 text-green-600" />
+              <AlertDescription className="text-green-700 font-medium">
+                Location captured successfully!
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* Main Form Card */}
+          <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-2xl rounded-3xl overflow-hidden">
+            <CardContent className="p-8">
+              <form onSubmit={handleSubmit} className="space-y-8">
+                {error && (
+                  <Alert variant="destructive" className="border-red-200 bg-red-50/80 rounded-2xl">
+                    <AlertDescription className="text-red-700 font-medium">{error}</AlertDescription>
+                  </Alert>
+                )}
+
+                {/* Role Selection - Step 1 */}
+                <div className="space-y-4">
+                  <Label className="text-lg font-semibold text-gray-800">I am a</Label>
+                  <div className="grid grid-cols-1 gap-4">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedRole("user")}
+                      className={`p-6 rounded-2xl border-2 transition-all duration-300 ${
+                        selectedRole === "user"
+                          ? "border-red-500 bg-red-50 shadow-lg"
+                          : "border-gray-200 bg-white hover:border-gray-300"
+                      }`}
+                    >
+                      <div className="flex items-center space-x-4">
+                        <User className={`w-8 h-8 ${selectedRole === "user" ? "text-red-600" : "text-gray-400"}`} />
+                        <div className="text-left">
+                          <p className={`font-semibold ${selectedRole === "user" ? "text-red-600" : "text-gray-600"}`}>
+                            Mess User
+                          </p>
+                          <p className="text-xs text-gray-500">Find and book meals</p>
+                        </div>
                       </div>
-                    </div>
-                  </button>
+                    </button>
 
-                  <button
-                    type="button"
-                    onClick={() => setSelectedRole("provider")}
-                    className={`p-6 rounded-2xl border-2 transition-all duration-300 ${
-                      selectedRole === "provider"
-                        ? "border-red-500 bg-red-50 shadow-lg"
-                        : "border-gray-200 bg-white hover:border-gray-300"
-                    }`}
-                  >
-                    <div className="flex items-center space-x-4">
-                      <ChefHat
-                        className={`w-8 h-8 ${selectedRole === "provider" ? "text-red-600" : "text-gray-400"}`}
-                      />
-                      <div className="text-left">
-                        <p
-                          className={`font-semibold ${selectedRole === "provider" ? "text-red-600" : "text-gray-600"}`}
-                        >
-                          Mess Provider
-                        </p>
-                        <p className="text-xs text-gray-500">Manage your mess</p>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedRole("provider")}
+                      className={`p-6 rounded-2xl border-2 transition-all duration-300 ${
+                        selectedRole === "provider"
+                          ? "border-red-500 bg-red-50 shadow-lg"
+                          : "border-gray-200 bg-white hover:border-gray-300"
+                      }`}
+                    >
+                      <div className="flex items-center space-x-4">
+                        <ChefHat
+                          className={`w-8 h-8 ${selectedRole === "provider" ? "text-red-600" : "text-gray-400"}`}
+                        />
+                        <div className="text-left">
+                          <p
+                            className={`font-semibold ${selectedRole === "provider" ? "text-red-600" : "text-gray-600"}`}
+                          >
+                            Mess Provider
+                          </p>
+                          <p className="text-xs text-gray-500">Manage your mess</p>
+                        </div>
                       </div>
-                    </div>
-                  </button>
+                    </button>
+                  </div>
                 </div>
-              </div>
 
-              {selectedRole && (
-                <div className="space-y-6">
-                  {/* Full Name */}
-                  <div className="space-y-2">
-                    <Label htmlFor="full_name" className="text-sm font-semibold text-gray-700">
-                      Full Name
-                    </Label>
-                    <Input
-                      id="full_name"
-                      value={formData.full_name}
-                      onChange={(e) => handleInputChange("full_name", e.target.value)}
-                      className="h-12 border-gray-200 focus:border-red-500 rounded-xl bg-white/50"
-                      placeholder="Enter your full name"
-                      required
-                    />
-                  </div>
+                {selectedRole && (
+                  <div className="space-y-6">
+                    {/* Full Name */}
+                    <div className="space-y-2">
+                      <Label htmlFor="full_name" className="text-sm font-semibold text-gray-700">
+                        Full Name
+                      </Label>
+                      <Input
+                        id="full_name"
+                        value={formData.full_name}
+                        onChange={(e) => handleInputChange("full_name", e.target.value)}
+                        className="h-12 border-gray-200 focus:border-red-500 rounded-xl bg-white/50"
+                        placeholder="Enter your full name"
+                        required
+                      />
+                    </div>
 
-                  {/* Phone Number - For both user types */}
-                  <div className="space-y-2">
-                    <Label htmlFor="phone_number" className="text-sm font-semibold text-gray-700">
-                      Mobile Number
-                    </Label>
-                    <Input
-                      id="phone_number"
-                      value={formData.phone_number}
-                      onChange={(e) => handleInputChange("phone_number", e.target.value)}
-                      className="h-12 border-gray-200 focus:border-red-500 rounded-xl bg-white/50"
-                      placeholder="+91 9876543210"
-                      required
-                    />
-                  </div>
+                    {/* Phone Number - For both user types */}
+                    <div className="space-y-2">
+                      <Label htmlFor="phone_number" className="text-sm font-semibold text-gray-700">
+                        Mobile Number
+                      </Label>
+                      <Input
+                        id="phone_number"
+                        value={formData.phone_number}
+                        onChange={(e) => handleInputChange("phone_number", e.target.value)}
+                        className="h-12 border-gray-200 focus:border-red-500 rounded-xl bg-white/50"
+                        placeholder="+91 9876543210"
+                        required
+                      />
+                    </div>
 
-                  {/* User-specific fields */}
-                  {selectedRole === "user" && (
-                    <div className="space-y-6">
-                      <div className="grid grid-cols-2 gap-4">
+                    {/* User-specific fields */}
+                    {selectedRole === "user" && (
+                      <div className="space-y-6">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label className="text-sm font-semibold text-gray-700">Gender</Label>
+                            <Select
+                              value={formData.gender}
+                              onValueChange={(value) => handleInputChange("gender", value)}
+                            >
+                              <SelectTrigger className="h-12 border-gray-200 focus:border-red-500 rounded-xl bg-white/50">
+                                <SelectValue placeholder="Select" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="male">Male</SelectItem>
+                                <SelectItem value="female">Female</SelectItem>
+                                <SelectItem value="other">Other</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="age" className="text-sm font-semibold text-gray-700">
+                              Age
+                            </Label>
+                            <Input
+                              id="age"
+                              type="number"
+                              value={formData.age}
+                              onChange={(e) => handleInputChange("age", e.target.value)}
+                              className="h-12 border-gray-200 focus:border-red-500 rounded-xl bg-white/50"
+                              placeholder="25"
+                              min="16"
+                              max="100"
+                              required
+                            />
+                          </div>
+                        </div>
+
                         <div className="space-y-2">
-                          <Label className="text-sm font-semibold text-gray-700">Gender</Label>
-                          <Select value={formData.gender} onValueChange={(value) => handleInputChange("gender", value)}>
+                          <Label htmlFor="institution" className="text-sm font-semibold text-gray-700">
+                            Institution Name
+                          </Label>
+                          <Input
+                            id="institution"
+                            value={formData.institution}
+                            onChange={(e) => handleInputChange("institution", e.target.value)}
+                            className="h-12 border-gray-200 focus:border-red-500 rounded-xl bg-white/50"
+                            placeholder="e.g., IIT Mumbai, TCS, etc."
+                            required
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label className="text-sm font-semibold text-gray-700">Institution Type</Label>
+                          <Select
+                            value={formData.institution_type}
+                            onValueChange={(value) => handleInputChange("institution_type", value)}
+                          >
                             <SelectTrigger className="h-12 border-gray-200 focus:border-red-500 rounded-xl bg-white/50">
-                              <SelectValue placeholder="Select" />
+                              <SelectValue placeholder="Select type" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="male">Male</SelectItem>
-                              <SelectItem value="female">Female</SelectItem>
-                              <SelectItem value="other">Other</SelectItem>
+                              <SelectItem value="college">College</SelectItem>
+                              <SelectItem value="hostel">Hostel</SelectItem>
+                              <SelectItem value="company">Company</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
+                      </div>
+                    )}
+
+                    {/* Provider-specific fields */}
+                    {selectedRole === "provider" && (
+                      <div className="space-y-6">
                         <div className="space-y-2">
-                          <Label htmlFor="age" className="text-sm font-semibold text-gray-700">
-                            Age
+                          <Label htmlFor="mess_name" className="text-sm font-semibold text-gray-700">
+                            Mess Name
                           </Label>
                           <Input
-                            id="age"
-                            type="number"
-                            value={formData.age}
-                            onChange={(e) => handleInputChange("age", e.target.value)}
+                            id="mess_name"
+                            value={formData.mess_name}
+                            onChange={(e) => handleInputChange("mess_name", e.target.value)}
                             className="h-12 border-gray-200 focus:border-red-500 rounded-xl bg-white/50"
-                            placeholder="25"
-                            min="16"
-                            max="100"
+                            placeholder="e.g., Annapurna Mess"
+                            required
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="address" className="text-sm font-semibold text-gray-700">
+                            Mess Address
+                          </Label>
+                          <Input
+                            id="address"
+                            value={formData.address}
+                            onChange={(e) => handleInputChange("address", e.target.value)}
+                            className="h-12 border-gray-200 focus:border-red-500 rounded-xl bg-white/50"
+                            placeholder="Full address of your mess"
+                            required
+                          />
+                        </div>
+
+                        <div className="space-y-3">
+                          <Label className="text-sm font-semibold text-gray-700">Nearby College / Company</Label>
+                          <div className="flex gap-2">
+                            <Input
+                              value={tagInput}
+                              onChange={(e) => setTagInput(e.target.value)}
+                              onKeyPress={handleKeyPress}
+                              className="h-12 border-gray-200 focus:border-red-500 rounded-xl bg-white/50"
+                              placeholder="e.g., IIT Mumbai"
+                            />
+                            <Button
+                              type="button"
+                              onClick={addTag}
+                              className="h-12 px-6 bg-red-600 hover:bg-red-700 rounded-xl"
+                            >
+                              Add
+                            </Button>
+                          </div>
+                          {tags.length > 0 && (
+                            <div className="flex flex-wrap gap-2">
+                              {tags.map((tag, index) => (
+                                <Badge
+                                  key={index}
+                                  variant="secondary"
+                                  className="bg-red-100 text-red-700 hover:bg-red-200 rounded-lg px-3 py-1"
+                                >
+                                  {tag}
+                                  <button
+                                    type="button"
+                                    onClick={() => removeTag(tag)}
+                                    className="ml-2 hover:text-red-900"
+                                  >
+                                    <X className="w-3 h-3" />
+                                  </button>
+                                </Badge>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Food Preference */}
+                    <div className="space-y-3">
+                      <Label className="text-sm font-semibold text-gray-700">Food Preference</Label>
+                      <RadioGroup
+                        value={formData.food_preference}
+                        onValueChange={(value) => handleInputChange("food_preference", value)}
+                        className="grid grid-cols-3 gap-3"
+                      >
+                        {["veg", "non_veg", "jain"].map((pref) => (
+                          <div
+                            key={pref}
+                            className="flex items-center space-x-2 rounded-xl border border-gray-200 p-4 hover:border-red-300 transition-colors bg-white/50"
+                          >
+                            <RadioGroupItem value={pref} id={pref} />
+                            <Label htmlFor={pref} className="text-sm cursor-pointer capitalize">
+                              {pref.replace("_", "-")}
+                            </Label>
+                          </div>
+                        ))}
+                      </RadioGroup>
+                    </div>
+
+                    {/* Location Fields */}
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="city" className="text-sm font-semibold text-gray-700">
+                            City
+                          </Label>
+                          <Input
+                            id="city"
+                            value={formData.city}
+                            onChange={(e) => handleInputChange("city", e.target.value)}
+                            className="h-12 border-gray-200 focus:border-red-500 rounded-xl bg-white/50"
+                            placeholder="Mumbai"
+                            required
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="state" className="text-sm font-semibold text-gray-700">
+                            State
+                          </Label>
+                          <Input
+                            id="state"
+                            value={formData.state}
+                            onChange={(e) => handleInputChange("state", e.target.value)}
+                            className="h-12 border-gray-200 focus:border-red-500 rounded-xl bg-white/50"
+                            placeholder="Maharashtra"
                             required
                           />
                         </div>
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="institution" className="text-sm font-semibold text-gray-700">
-                          Institution Name
+                        <Label htmlFor="pincode" className="text-sm font-semibold text-gray-700">
+                          Pincode
                         </Label>
                         <Input
-                          id="institution"
-                          value={formData.institution}
-                          onChange={(e) => handleInputChange("institution", e.target.value)}
+                          id="pincode"
+                          value={formData.pincode}
+                          onChange={(e) => handleInputChange("pincode", e.target.value)}
                           className="h-12 border-gray-200 focus:border-red-500 rounded-xl bg-white/50"
-                          placeholder="e.g., IIT Mumbai, TCS, etc."
+                          placeholder="400001"
+                          pattern="[0-9]{6}"
                           required
                         />
                       </div>
 
-                      <div className="space-y-2">
-                        <Label className="text-sm font-semibold text-gray-700">Institution Type</Label>
-                        <Select
-                          value={formData.institution_type}
-                          onValueChange={(value) => handleInputChange("institution_type", value)}
+                      {!locationCaptured && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={captureLocation}
+                          disabled={locationLoading}
+                          className="w-full h-12 border-red-200 text-red-600 hover:bg-red-50 rounded-xl bg-white/50"
                         >
-                          <SelectTrigger className="h-12 border-gray-200 focus:border-red-500 rounded-xl bg-white/50">
-                            <SelectValue placeholder="Select type" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="college">College</SelectItem>
-                            <SelectItem value="hostel">Hostel</SelectItem>
-                            <SelectItem value="company">Company</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
+                          {locationLoading ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          ) : (
+                            <MapPin className="mr-2 h-4 w-4" />
+                          )}
+                          📍 Capture My Location
+                        </Button>
+                      )}
                     </div>
-                  )}
 
-                  {/* Provider-specific fields */}
-                  {selectedRole === "provider" && (
-                    <div className="space-y-6">
-                      <div className="space-y-2">
-                        <Label htmlFor="mess_name" className="text-sm font-semibold text-gray-700">
-                          Mess Name
-                        </Label>
-                        <Input
-                          id="mess_name"
-                          value={formData.mess_name}
-                          onChange={(e) => handleInputChange("mess_name", e.target.value)}
-                          className="h-12 border-gray-200 focus:border-red-500 rounded-xl bg-white/50"
-                          placeholder="e.g., Annapurna Mess"
-                          required
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="address" className="text-sm font-semibold text-gray-700">
-                          Mess Address
-                        </Label>
-                        <Input
-                          id="address"
-                          value={formData.address}
-                          onChange={(e) => handleInputChange("address", e.target.value)}
-                          className="h-12 border-gray-200 focus:border-red-500 rounded-xl bg-white/50"
-                          placeholder="Full address of your mess"
-                          required
-                        />
-                      </div>
-
-                      <div className="space-y-3">
-                        <Label className="text-sm font-semibold text-gray-700">Nearby College / Company</Label>
-                        <div className="flex gap-2">
-                          <Input
-                            value={tagInput}
-                            onChange={(e) => setTagInput(e.target.value)}
-                            onKeyPress={handleKeyPress}
-                            className="h-12 border-gray-200 focus:border-red-500 rounded-xl bg-white/50"
-                            placeholder="e.g., IIT Mumbai"
-                          />
-                          <Button
-                            type="button"
-                            onClick={addTag}
-                            className="h-12 px-6 bg-red-600 hover:bg-red-700 rounded-xl"
-                          >
-                            Add
-                          </Button>
-                        </div>
-                        {tags.length > 0 && (
-                          <div className="flex flex-wrap gap-2">
-                            {tags.map((tag, index) => (
-                              <Badge
-                                key={index}
-                                variant="secondary"
-                                className="bg-red-100 text-red-700 hover:bg-red-200 rounded-lg px-3 py-1"
-                              >
-                                {tag}
-                                <button
-                                  type="button"
-                                  onClick={() => removeTag(tag)}
-                                  className="ml-2 hover:text-red-900"
-                                >
-                                  <X className="w-3 h-3" />
-                                </button>
-                              </Badge>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Food Preference */}
-                  <div className="space-y-3">
-                    <Label className="text-sm font-semibold text-gray-700">Food Preference</Label>
-                    <RadioGroup
-                      value={formData.food_preference}
-                      onValueChange={(value) => handleInputChange("food_preference", value)}
-                      className="grid grid-cols-3 gap-3"
+                    {/* Submit Button */}
+                    <Button
+                      type="submit"
+                      disabled={!isFormValid() || isLoading}
+                      className="w-full h-14 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white font-semibold rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl"
                     >
-                      {["veg", "non_veg", "jain"].map((pref) => (
-                        <div
-                          key={pref}
-                          className="flex items-center space-x-2 rounded-xl border border-gray-200 p-4 hover:border-red-300 transition-colors bg-white/50"
-                        >
-                          <RadioGroupItem value={pref} id={pref} />
-                          <Label htmlFor={pref} className="text-sm cursor-pointer capitalize">
-                            {pref.replace("_", "-")}
-                          </Label>
-                        </div>
-                      ))}
-                    </RadioGroup>
+                      {isLoading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : null}
+                      Complete Profile
+                    </Button>
                   </div>
-
-                  {/* Location Fields */}
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="city" className="text-sm font-semibold text-gray-700">
-                          City
-                        </Label>
-                        <Input
-                          id="city"
-                          value={formData.city}
-                          onChange={(e) => handleInputChange("city", e.target.value)}
-                          className="h-12 border-gray-200 focus:border-red-500 rounded-xl bg-white/50"
-                          placeholder="Mumbai"
-                          required
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="state" className="text-sm font-semibold text-gray-700">
-                          State
-                        </Label>
-                        <Input
-                          id="state"
-                          value={formData.state}
-                          onChange={(e) => handleInputChange("state", e.target.value)}
-                          className="h-12 border-gray-200 focus:border-red-500 rounded-xl bg-white/50"
-                          placeholder="Maharashtra"
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="pincode" className="text-sm font-semibold text-gray-700">
-                        Pincode
-                      </Label>
-                      <Input
-                        id="pincode"
-                        value={formData.pincode}
-                        onChange={(e) => handleInputChange("pincode", e.target.value)}
-                        className="h-12 border-gray-200 focus:border-red-500 rounded-xl bg-white/50"
-                        placeholder="400001"
-                        pattern="[0-9]{6}"
-                        required
-                      />
-                    </div>
-
-                    {!locationCaptured && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={captureLocation}
-                        disabled={locationLoading}
-                        className="w-full h-12 border-red-200 text-red-600 hover:bg-red-50 rounded-xl bg-white/50"
-                      >
-                        {locationLoading ? (
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        ) : (
-                          <MapPin className="mr-2 h-4 w-4" />
-                        )}
-                        📍 Capture My Location
-                      </Button>
-                    )}
-                  </div>
-
-                  {/* Submit Button */}
-                  <Button
-                    type="submit"
-                    disabled={!isFormValid() || isLoading}
-                    className="w-full h-14 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white font-semibold rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl"
-                  >
-                    {isLoading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : null}
-                    Complete Profile
-                  </Button>
-                </div>
-              )}
-            </form>
-          </CardContent>
-        </Card>
-      </div>
+                )}
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   )
 }

@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { createClient } from "@/lib/supabase/client"
+import { supabase } from "@/lib/supabase/client"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -34,8 +34,6 @@ export default function AdminDashboardOverview() {
   })
   const [recentMesses, setRecentMesses] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-
-  const supabase = createClient()
 
   useEffect(() => {
     fetchDashboardData()
