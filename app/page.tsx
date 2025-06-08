@@ -1,68 +1,88 @@
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+"use client"
 
-export default function LandingPage() {
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50">
-      <div className="container mx-auto px-4 py-16">
-        <div className="text-center mb-16">
-          <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-            Welcome to <span className="text-orange-600">MessCheck</span>
-          </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            Your ultimate platform for discovering, managing, and enjoying mess services. Connect with quality food
-            providers and streamline your meal experience.
-          </p>
-        </div>
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
+import { createClient } from "@/lib/supabase/client"
+import { ZomatoLoginScreen } from "@/components/auth/zomato-login-screen"
+import { Loader2 } from "lucide-react"
 
-        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader>
-              <CardTitle className="text-2xl text-center">For Users</CardTitle>
-              <CardDescription className="text-center">Discover and subscribe to quality mess services</CardDescription>
-            </CardHeader>
-            <CardContent className="text-center space-y-4">
-              <ul className="text-left space-y-2 mb-6">
-                <li>• Find nearby mess services</li>
-                <li>• Read reviews and ratings</li>
-                <li>• Subscribe to meal plans</li>
-                <li>• Track your meals and payments</li>
-              </ul>
-              <Link href="/login">
-                <Button className="w-full bg-orange-600 hover:bg-orange-700">Login as User</Button>
-              </Link>
-            </CardContent>
-          </Card>
+export default function HomePage() {
+  const [isLoading, setIsLoading] = useState(true)
+  const [showLogin, setShowLogin] = useState(false)
+  const router = useRouter()
+  const supabase = createClient()
 
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader>
-              <CardTitle className="text-2xl text-center">For Admins</CardTitle>
-              <CardDescription className="text-center">Manage the platform and oversee operations</CardDescription>
-            </CardHeader>
-            <CardContent className="text-center space-y-4">
-              <ul className="text-left space-y-2 mb-6">
-                <li>• Verify mess profiles</li>
-                <li>• Manage user accounts</li>
-                <li>• Monitor platform activity</li>
-                <li>• Handle disputes and reviews</li>
-              </ul>
-              <Link href="/admin-login">
-                <Button className="w-full bg-blue-600 hover:bg-blue-700">Admin Login</Button>
-              </Link>
-            </CardContent>
-          </Card>
-        </div>
+  useEffect(() => {
+    async function checkAuth() {
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession()
 
-        <div className="text-center mt-16">
-          <p className="text-gray-600">
-            New to MessCheck?{" "}
-            <Link href="/signup" className="text-orange-600 hover:underline">
-              Create an account
-            </Link>
-          </p>
+        if (session?.user) {
+          // Check if user has a complete profile
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("role, email, full_name")
+            .eq("id", session.user.id)
+            .single()
+
+          if (profile?.role) {
+            // Redirect to appropriate dashboard
+            switch (profile.role) {
+              case "admin":
+                router.replace("/admin/dashboard")
+                return
+              case "zeus":
+                router.replace("/zeus/dashboard")
+                return
+              case "provider":
+                router.replace("/provider/dashboard")
+                return
+              case "user":
+              default:
+                router.replace("/dashboard")
+                return
+            }
+          } else {
+            // User exists but no complete profile, redirect to onboarding
+            router.replace("/onboarding")
+            return
+          }
+        } else {
+          // No user session, show login
+          setShowLogin(true)
+        }
+      } catch (error) {
+        console.error("Auth check error:", error)
+        // On error, show login
+        setShowLogin(true)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    checkAuth()
+  }, [router, supabase])
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+            <Loader2 className="w-8 h-8 text-white animate-spin" />
+          </div>
+          <h1 className="text-2xl font-bold text-red-600 mb-2">MessCheck</h1>
+          <p className="text-gray-600">Loading...</p>
         </div>
       </div>
-    </div>
-  )
+    )
+  }
+
+  if (showLogin) {
+    return <ZomatoLoginScreen />
+  }
+
+  // This should not be reached due to redirects above
+  return null
 }

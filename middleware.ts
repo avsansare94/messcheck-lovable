@@ -39,16 +39,10 @@ export async function middleware(request: NextRequest) {
       },
     )
 
-    // Refresh session if needed
+    // Get session without throwing errors
     const {
       data: { session },
-      error: sessionError,
     } = await supabase.auth.getSession()
-
-    // Don't throw errors for missing sessions on public routes
-    if (sessionError && !pathname.startsWith("/login") && !pathname.startsWith("/admin-login") && pathname !== "/") {
-      console.warn("Session error:", sessionError.message)
-    }
 
     const user = session?.user || null
     let userProfile = null
@@ -70,12 +64,23 @@ export async function middleware(request: NextRequest) {
     }
 
     // Public routes that don't require authentication
-    const publicRoutes = ["/", "/login", "/admin-login", "/signup", "/about", "/contact"]
+    const publicRoutes = ["/", "/login", "/admin-login", "/signup", "/about", "/contact", "/unauthorized"]
     const isPublicRoute = publicRoutes.includes(pathname)
 
     // Protected routes that require authentication
     const protectedRoutes = ["/admin", "/zeus", "/provider", "/home", "/dashboard", "/profile", "/settings"]
     const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route))
+
+    // Handle root path specially to avoid redirect loops
+    if (pathname === "/") {
+      if (user && userProfile?.role) {
+        // Only redirect if we have a complete user profile
+        const redirectUrl = getRoleBasedRedirect(userProfile.role)
+        return NextResponse.redirect(new URL(redirectUrl, request.url))
+      }
+      // If no user or incomplete profile, let the root page handle it
+      return response
+    }
 
     // Handle authenticated users
     if (user && userProfile) {
@@ -96,12 +101,6 @@ export async function middleware(request: NextRequest) {
 
       if (pathname.startsWith("/provider") && userProfile.role !== "provider") {
         return NextResponse.redirect(new URL("/unauthorized", request.url))
-      }
-
-      // Redirect from root to appropriate dashboard
-      if (pathname === "/") {
-        const redirectUrl = getRoleBasedRedirect(userProfile.role)
-        return NextResponse.redirect(new URL(redirectUrl, request.url))
       }
     }
     // Handle unauthenticated users

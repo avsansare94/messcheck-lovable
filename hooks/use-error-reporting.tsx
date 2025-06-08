@@ -2,7 +2,6 @@
 
 import { useCallback } from "react"
 import { useToast } from "@/hooks/use-toast"
-import { captureException, addBreadcrumb } from "@/lib/sentry"
 
 export function useErrorReporting() {
   const { toast } = useToast()
@@ -14,18 +13,12 @@ export function useErrorReporting() {
         console.error(`Error in ${componentInfo || "unknown component"}:`, error)
       }
 
-      // Add breadcrumb for the component where the error occurred
-      if (componentInfo) {
-        addBreadcrumb(`Error in ${componentInfo}`, "error", { component: componentInfo })
+      // Don't report redirect errors as they are expected behavior
+      if (error.message?.includes("NEXT_REDIRECT") || error.name === "RedirectError") {
+        return error
       }
 
-      // Send to Sentry with additional context
-      captureException(error, {
-        component: componentInfo,
-        ...additionalContext,
-      })
-
-      // Show a toast notification
+      // Show a toast notification for actual errors
       toast({
         title: "An error occurred",
         description: error.message || "Something went wrong. Please try again later.",
@@ -39,7 +32,9 @@ export function useErrorReporting() {
   )
 
   const logEvent = useCallback((message: string, category?: string, data?: Record<string, any>) => {
-    addBreadcrumb(message, category, data)
+    if (process.env.NODE_ENV !== "production") {
+      console.log(`Event: ${message}`, { category, data })
+    }
   }, [])
 
   return { reportError, logEvent }
