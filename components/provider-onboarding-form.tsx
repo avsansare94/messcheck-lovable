@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -68,7 +67,9 @@ export function ProviderOnboardingForm() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     // Save provider data
-    localStorage.setItem("providerData", JSON.stringify(formData))
+    if (typeof window !== "undefined") {
+      localStorage.setItem("providerData", JSON.stringify(formData))
+    }
     router.push("/provider/home")
   }
 
@@ -229,3 +230,6 @@ export function ProviderOnboardingForm() {
     </div>
   )
 }
+
+// Default export for compatibility
+export default ProviderOnboardingForm

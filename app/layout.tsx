@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     title: "MessCheck",
   },
   themeColor: "#e11d48",
-    generator: 'v0.dev'
+  generator: "v0.dev",
 }
 
 export const viewport: Viewport = {
