@@ -39,12 +39,12 @@ export function ZomatoOnboardingFlow() {
     full_name: "",
     gender: "",
     age: "",
-    institution_name: "",
+    institution: "", // Changed from institution_name to match DB schema
     institution_type: "",
     food_preference: "",
     mess_name: "",
-    phone_number: "",
-    cuisine_type: "",
+    phone_number: "", // This exists in both user and provider forms now
+    address: "", // Added to match DB schema
     city: "",
     state: "",
     pincode: "",
@@ -165,27 +165,34 @@ export function ZomatoOnboardingFlow() {
       } = await supabase.auth.getUser()
       if (!user) throw new Error("No user found")
 
+      // Check if user already has admin role
+      const { data: existingProfile } = await supabase.from("profiles").select("role").eq("id", user.id).single()
+
+      // If user is already an admin, preserve that role
+      const role = existingProfile?.role === "admin" ? "admin" : selectedRole
+
+      // Create profile data object based on actual database schema
       const profileData = {
         id: user.id,
         email: user.email,
         full_name: formData.full_name,
-        role: selectedRole,
-        gender: selectedRole === "user" ? formData.gender : null,
-        age: selectedRole === "user" ? (formData.age ? Number.parseInt(formData.age) : null) : null,
-        institution_name: selectedRole === "user" ? formData.institution_name : null,
+        role: role, // Use the determined role
+        gender: formData.gender || null,
+        age: formData.age ? Number.parseInt(formData.age) : null,
+        institution: selectedRole === "user" ? formData.institution : null,
         institution_type: selectedRole === "user" ? formData.institution_type : null,
         food_preference: formData.food_preference,
-        mess_name: selectedRole === "provider" ? formData.mess_name : null,
-        phone_number: selectedRole === "provider" ? formData.phone_number : null,
-        cuisine_type: selectedRole === "provider" ? formData.cuisine_type : null,
-        nearby_tags: selectedRole === "provider" ? tags : null,
+        phone_number: formData.phone_number, // Save phone number for both user types
+        address: formData.address || null,
         city: formData.city,
         state: formData.state,
         pincode: formData.pincode,
-        geo_location: formData.geo_location ? `POINT(${formData.geo_location.lng} ${formData.geo_location.lat})` : null,
+        // Store location as text since we don't have PostGIS
+        geo_location: formData.geo_location ? `${formData.geo_location.lat},${formData.geo_location.lng}` : null,
         updated_at: new Date().toISOString(),
       }
 
+      // Remove any fields that don't exist in the database schema
       const { error } = await supabase.from("profiles").update(profileData).eq("id", user.id)
 
       if (error) throw error
@@ -193,12 +200,15 @@ export function ZomatoOnboardingFlow() {
       toast.success("Welcome to MessCheck, your profile is set!")
 
       // Role-based redirect
-      if (selectedRole === "provider") {
+      if (role === "admin") {
+        router.push("/admin/dashboard")
+      } else if (role === "provider") {
         router.push("/provider/dashboard")
       } else {
-        router.push("/user/dashboard")
+        router.push("/dashboard") // Changed from /user/dashboard to match middleware
       }
     } catch (error: any) {
+      console.error("Profile update error:", error)
       setError(error.message || "Failed to save profile")
     } finally {
       setIsLoading(false)
@@ -210,14 +220,15 @@ export function ZomatoOnboardingFlow() {
       selectedRole &&
       formData.full_name &&
       formData.food_preference &&
+      formData.phone_number && // Now required for both roles
       formData.city &&
       formData.state &&
       formData.pincode
 
     if (selectedRole === "user") {
-      return baseFields && formData.gender && formData.age && formData.institution_name && formData.institution_type
+      return baseFields && formData.gender && formData.age && formData.institution && formData.institution_type
     } else if (selectedRole === "provider") {
-      return baseFields && formData.mess_name && formData.phone_number && formData.cuisine_type
+      return baseFields
     }
 
     return false
@@ -339,6 +350,21 @@ export function ZomatoOnboardingFlow() {
                     />
                   </div>
 
+                  {/* Phone Number - For both user types */}
+                  <div className="space-y-2">
+                    <Label htmlFor="phone_number" className="text-sm font-semibold text-gray-700">
+                      Mobile Number
+                    </Label>
+                    <Input
+                      id="phone_number"
+                      value={formData.phone_number}
+                      onChange={(e) => handleInputChange("phone_number", e.target.value)}
+                      className="h-12 border-gray-200 focus:border-red-500 rounded-xl bg-white/50"
+                      placeholder="+91 9876543210"
+                      required
+                    />
+                  </div>
+
                   {/* User-specific fields */}
                   {selectedRole === "user" && (
                     <div className="space-y-6">
@@ -375,13 +401,13 @@ export function ZomatoOnboardingFlow() {
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="institution_name" className="text-sm font-semibold text-gray-700">
+                        <Label htmlFor="institution" className="text-sm font-semibold text-gray-700">
                           Institution Name
                         </Label>
                         <Input
-                          id="institution_name"
-                          value={formData.institution_name}
-                          onChange={(e) => handleInputChange("institution_name", e.target.value)}
+                          id="institution"
+                          value={formData.institution}
+                          onChange={(e) => handleInputChange("institution", e.target.value)}
                           className="h-12 border-gray-200 focus:border-red-500 rounded-xl bg-white/50"
                           placeholder="e.g., IIT Mumbai, TCS, etc."
                           required
@@ -425,38 +451,17 @@ export function ZomatoOnboardingFlow() {
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="phone_number" className="text-sm font-semibold text-gray-700">
-                          Phone Number
+                        <Label htmlFor="address" className="text-sm font-semibold text-gray-700">
+                          Mess Address
                         </Label>
                         <Input
-                          id="phone_number"
-                          value={formData.phone_number}
-                          onChange={(e) => handleInputChange("phone_number", e.target.value)}
+                          id="address"
+                          value={formData.address}
+                          onChange={(e) => handleInputChange("address", e.target.value)}
                           className="h-12 border-gray-200 focus:border-red-500 rounded-xl bg-white/50"
-                          placeholder="+91 9876543210"
+                          placeholder="Full address of your mess"
                           required
                         />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label className="text-sm font-semibold text-gray-700">Cuisine Type</Label>
-                        <RadioGroup
-                          value={formData.cuisine_type}
-                          onValueChange={(value) => handleInputChange("cuisine_type", value)}
-                          className="grid grid-cols-2 gap-3"
-                        >
-                          {["veg", "non_veg", "jain", "mixed"].map((type) => (
-                            <div
-                              key={type}
-                              className="flex items-center space-x-2 rounded-xl border border-gray-200 p-4 hover:border-red-300 transition-colors bg-white/50"
-                            >
-                              <RadioGroupItem value={type} id={type} />
-                              <Label htmlFor={type} className="text-sm cursor-pointer capitalize">
-                                {type.replace("_", "-")}
-                              </Label>
-                            </div>
-                          ))}
-                        </RadioGroup>
                       </div>
 
                       <div className="space-y-3">
@@ -587,14 +592,14 @@ export function ZomatoOnboardingFlow() {
                     )}
                   </div>
 
-                  {/* Submit Button */}
+                  {/* Submit Button - Renamed to "Complete Profile" */}
                   <Button
                     type="submit"
                     disabled={!isFormValid() || isLoading}
                     className="w-full h-14 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white font-semibold rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl"
                   >
                     {isLoading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : null}
-                    Complete Setup
+                    Complete Profile
                   </Button>
                 </div>
               )}
