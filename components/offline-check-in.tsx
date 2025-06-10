@@ -40,13 +40,15 @@ export function OfflineCheckIn({ userId, messId, subscriptionId, mealType, messN
       // Generate a unique ID for this check-in
       const actionId = `check-in-${userId}-${messId}-${mealType}-${Date.now()}`
 
-      // Add to pending actions queue
+      // Add to pending actions queue with proper callback
       await offlineManager.addPendingAction({
         id: actionId,
         type: "checkIn",
         data: checkInData,
         timestamp: Date.now(),
         retryCount: 0,
+      }, () => {
+        console.log("Check-in action queued successfully")
       })
 
       // Mark as queued
