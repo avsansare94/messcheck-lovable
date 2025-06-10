@@ -4,9 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+  "build": "next build",
++ "build:dev": "next build --mode development",  // For Next.js
+  "start": "next start",
+  "lint": "next lint"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
