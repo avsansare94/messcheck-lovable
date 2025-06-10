@@ -1,20 +1,21 @@
+
 "use client"
 
 import type React from "react"
-import Link from "next/link"
+import { Link } from "react-router-dom"
 import { ChevronLeft } from "lucide-react"
 
 interface ProviderSettingsLayoutProps {
   children: React.ReactNode
-  title: string
+  title?: string
   description?: string
 }
 
-export function ProviderSettingsLayout({ children, title, description }: ProviderSettingsLayoutProps) {
+export function ProviderSettingsLayout({ children, title = "Settings", description }: ProviderSettingsLayoutProps) {
   return (
     <div className="container max-w-md mx-auto px-0 pb-20">
       <header className="sticky top-0 z-10 bg-white border-b border-gray-100 px-4 py-3 flex items-center">
-        <Link href="/provider/settings" className="mr-3">
+        <Link to="/provider/settings" className="mr-3">
           <ChevronLeft className="h-5 w-5" />
         </Link>
         <div>

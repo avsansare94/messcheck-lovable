@@ -1,80 +1,50 @@
-import * as Sentry from "@sentry/nextjs"
 
-const SENTRY_DSN = process.env.NEXT_PUBLIC_SENTRY_DSN
+import * as Sentry from "@sentry/react"
 
-export function initSentry() {
-  if (SENTRY_DSN) {
-    Sentry.init({
-      dsn: SENTRY_DSN,
-      // Adjust this value in production, or use tracesSampler for greater control
-      tracesSampleRate: 1.0,
-      // Enable performance monitoring
-      integrations: [
-        new Sentry.BrowserTracing({
-          // Set sampling rate for performance monitoring
-          tracePropagationTargets: ["localhost", /^https:\/\/messcheck\.vercel\.app/],
-        }),
-        new Sentry.Replay({
-          // Capture 10% of all sessions
-          sessionSampleRate: 0.1,
-          // Capture 100% of sessions with an error
-          errorSampleRate: 1.0,
-        }),
-      ],
-      // We recommend adjusting this value in production
-      replaysSessionSampleRate: 0.1,
-      replaysOnErrorSampleRate: 1.0,
-      environment: process.env.NODE_ENV,
-      // Enable debug in development
-      debug: process.env.NODE_ENV === "development",
-      beforeSend(event) {
-        // Don't send events in development unless explicitly enabled
-        if (process.env.NODE_ENV === "development" && !process.env.NEXT_PUBLIC_ENABLE_SENTRY_DEV) {
-          return null
-        }
-        return event
-      },
-    })
-  } else {
-    console.warn("Sentry DSN not provided. Error tracking disabled.")
-  }
+// Initialize Sentry for React
+Sentry.init({
+  dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
+  environment: process.env.NODE_ENV,
+  integrations: [
+    Sentry.browserTracingIntegration(),
+    Sentry.replayIntegration({
+      maskAllText: false,
+      blockAllMedia: false,
+    }),
+  ],
+  tracesSampleRate: 1.0,
+  replaysSessionSampleRate: 0.1,
+  replaysOnErrorSampleRate: 1.0,
+})
+
+// Helper function to add breadcrumbs
+export const addBreadcrumb = (message: string, category: string, data?: any) => {
+  Sentry.addBreadcrumb({
+    message,
+    category,
+    data,
+    level: "info",
+  })
 }
 
-// Helper function to capture exceptions with additional context
-export function captureException(error: Error, context?: Record<string, any>) {
-  if (SENTRY_DSN) {
-    // Use a safer approach that doesn't rely on configureScope
-    Sentry.captureException(error, {
-      extra: context,
-    })
-  } else {
-    // Fallback to console in development or when Sentry is not configured
-    console.error("Error captured:", error, context)
-  }
+// Helper function to capture exceptions
+export const captureException = (error: Error, context?: any) => {
+  Sentry.captureException(error, {
+    extra: context,
+  })
 }
 
-// Set user information for better error tracking
-export function setUserInfo(user: { id?: string; email?: string; username?: string }) {
-  if (SENTRY_DSN) {
-    Sentry.setUser(user)
-  }
+// Helper function to capture messages
+export const captureMessage = (message: string, level: Sentry.SeverityLevel = "info") => {
+  Sentry.captureMessage(message, level)
 }
 
-// Clear user information on logout
-export function clearUserInfo() {
-  if (SENTRY_DSN) {
-    Sentry.setUser(null)
-  }
+// Helper function to set user context
+export const setUser = (user: { id: string; email?: string; username?: string }) => {
+  Sentry.setUser(user)
 }
 
-// Add breadcrumbs for better debugging
-export function addBreadcrumb(message: string, category?: string, data?: Record<string, any>) {
-  if (SENTRY_DSN) {
-    Sentry.addBreadcrumb({
-      message,
-      category: category || "app",
-      data,
-      level: "info",
-    })
-  }
+// Helper function to set tags
+export const setTag = (key: string, value: string) => {
+  Sentry.setTag(key, value)
 }

@@ -1,7 +1,8 @@
+
 "use client"
 
 import { useEffect, type ReactNode } from "react"
-import * as Sentry from "@sentry/nextjs"
+import * as Sentry from "@sentry/react"
 import { addBreadcrumb } from "@/lib/sentry"
 
 interface GlobalErrorHandlerProps {
@@ -33,7 +34,7 @@ export function GlobalErrorHandler({ children }: GlobalErrorHandlerProps) {
       event.preventDefault()
     }
 
-    // Add navigation breadcrumbs
+    // Add navigation breadcrumbs for React Router
     const handleRouteChange = (url: string) => {
       addBreadcrumb(`Navigation to ${url}`, "navigation", { to: url })
     }
@@ -42,27 +43,18 @@ export function GlobalErrorHandler({ children }: GlobalErrorHandlerProps) {
     window.addEventListener("unhandledrejection", handleUnhandledRejection)
     window.addEventListener("error", handleError)
 
-    // Add navigation tracking if available
-    if (typeof window !== "undefined" && window.navigation) {
-      window.navigation.addEventListener("navigate", (event) => {
-        if (event.destination?.url) {
-          handleRouteChange(event.destination.url)
-        }
-      })
+    // Add navigation tracking for React Router
+    const handlePopState = () => {
+      handleRouteChange(window.location.pathname)
     }
+
+    window.addEventListener("popstate", handlePopState)
 
     // Clean up on component unmount
     return () => {
       window.removeEventListener("unhandledrejection", handleUnhandledRejection)
       window.removeEventListener("error", handleError)
-
-      if (typeof window !== "undefined" && window.navigation) {
-        window.navigation.removeEventListener("navigate", (event) => {
-          if (event.destination?.url) {
-            handleRouteChange(event.destination.url)
-          }
-        })
-      }
+      window.removeEventListener("popstate", handlePopState)
     }
   }, [])
 
