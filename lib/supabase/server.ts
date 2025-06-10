@@ -21,6 +21,3 @@ export function createClient() {
     }
   )
 }
-
-// Alias for compatibility
-export const createServerClient = createClient
