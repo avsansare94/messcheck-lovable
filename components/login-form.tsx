@@ -1,3 +1,4 @@
+
 "use client"
 
 import type React from "react"
@@ -31,12 +32,41 @@ export function LoginForm() {
       // Simulate API call for authentication
       await new Promise((resolve) => setTimeout(resolve, 1500))
 
-      // Create a mock user with the selected role
+      // Create a mock user with proper Supabase User structure
       const mockUser = {
         id: "user-" + Math.random().toString(36).substring(2, 9),
         email: email,
-        username: email.split("@")[0],
-        role: selectedRole, // Use the role from localStorage
+        app_metadata: { role: selectedRole },
+        user_metadata: { username: email.split("@")[0] },
+        aud: "authenticated",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        email_confirmed_at: new Date().toISOString(),
+        phone: null,
+        confirmation_sent_at: null,
+        confirmed_at: new Date().toISOString(),
+        last_sign_in_at: new Date().toISOString(),
+        role: "authenticated",
+        recovery_sent_at: null,
+        invited_at: null,
+        action_link: null,
+        email_change: null,
+        email_change_sent_at: null,
+        email_change_token: null,
+        email_change_confirm_status: 0,
+        banned_until: null,
+        new_email: null,
+        new_phone: null,
+        phone_change: null,
+        phone_change_token: null,
+        phone_change_sent_at: null,
+        phone_confirmed_at: null,
+        phone_change_confirm_status: 0,
+        email_change_token_new: null,
+        email_change_token_current: null,
+        is_sso_user: false,
+        deleted_at: null,
+        is_anonymous: false,
       }
 
       // Set the user in context

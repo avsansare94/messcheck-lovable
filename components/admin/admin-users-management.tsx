@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useEffect, useState } from "react"
@@ -95,13 +94,12 @@ export default function AdminUsersManagement() {
       const mergedUsers =
         profiles?.map((profile) => {
           const authUser = authUsers?.users.find((u) => u.id === profile.id)
-          // Check if user is banned by looking at ban_duration or user_metadata
-          const isBanned = authUser?.user_metadata?.banned || 
-                          (authUser?.banned_until && new Date(authUser.banned_until) > new Date())
+          // Check if user is banned by looking at user_metadata
+          const isBanned = authUser?.user_metadata?.banned || false
           return {
             ...profile,
             last_sign_in: authUser?.last_sign_in_at,
-            is_blocked: isBanned || false,
+            is_blocked: isBanned,
           }
         }) || []
 
@@ -152,19 +150,11 @@ export default function AdminUsersManagement() {
   const handleBlockUser = async (userId: string, block: boolean) => {
     setActionLoading(userId)
     try {
-      if (block) {
-        // Update user metadata to mark as banned
-        const { error } = await supabase.auth.admin.updateUserById(userId, {
-          user_metadata: { banned: true },
-        })
-        if (error) throw error
-      } else {
-        // Remove ban from user metadata
-        const { error } = await supabase.auth.admin.updateUserById(userId, {
-          user_metadata: { banned: false },
-        })
-        if (error) throw error
-      }
+      // Update user metadata to mark as banned
+      const { error } = await supabase.auth.admin.updateUserById(userId, {
+        user_metadata: { banned: block },
+      })
+      if (error) throw error
 
       // Log admin activity
       const {
