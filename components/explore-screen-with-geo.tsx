@@ -16,7 +16,7 @@ import { OfflineIndicator } from "@/components/offline-indicator"
 import { useOnlineStatus } from "@/hooks/use-online-status"
 import offlineManager from "@/utils/offline-manager"
 
-// Sample data with coordinates
+// Sample data with coordinates - add distance property to types
 const messData = [
   {
     id: 1,
@@ -25,7 +25,8 @@ const messData = [
     ethnicity: "North Indian",
     price: "₹3500/month",
     rating: 4.5,
-    coordinates: { latitude: 19.1334, longitude: 72.9133 }, // Example coordinates
+    coordinates: { latitude: 19.1334, longitude: 72.9133 },
+    distance: "0.5 km", // Add default distance
     tags: ["North Indian"],
     isFavorite: false,
     isVerified: true,
@@ -42,7 +43,8 @@ const messData = [
     ethnicity: "Punjabi",
     price: "₹2700/month",
     rating: 4.0,
-    coordinates: { latitude: 19.1354, longitude: 72.9153 }, // Example coordinates
+    coordinates: { latitude: 19.1354, longitude: 72.9153 },
+    distance: "0.8 km", // Add default distance
     tags: ["North Indian", "Mughlai"],
     isFavorite: false,
     isVerified: true,
@@ -59,7 +61,8 @@ const messData = [
     ethnicity: "Gujarati",
     price: "₹2500/month",
     rating: 4.2,
-    coordinates: { latitude: 19.1374, longitude: 72.9173 }, // Example coordinates
+    coordinates: { latitude: 19.1374, longitude: 72.9173 },
+    distance: "1.2 km", // Add default distance
     tags: ["Jain", "Gujarati"],
     isFavorite: true,
     isVerified: false,
@@ -71,14 +74,15 @@ const messData = [
   },
 ]
 
-// Unclaimed mess data with coordinates
+// Unclaimed mess data with coordinates - add distance property
 const unclaimedMessData = [
   {
     id: 101,
     name: "Student's Favorite Mess",
     type: "Mixed",
     rating: 3.8,
-    coordinates: { latitude: 19.1314, longitude: 72.9113 }, // Example coordinates
+    coordinates: { latitude: 19.1314, longitude: 72.9113 },
+    distance: "0.3 km", // Add default distance
     location: "Delhi University",
     isUnclaimed: true,
   },
@@ -87,7 +91,8 @@ const unclaimedMessData = [
     name: "Campus Tiffin",
     type: "Veg",
     rating: 4.1,
-    coordinates: { latitude: 19.1294, longitude: 72.9093 }, // Example coordinates
+    coordinates: { latitude: 19.1294, longitude: 72.9093 },
+    distance: "0.5 km", // Add default distance
     location: "IIT Bombay",
     isUnclaimed: true,
   },
@@ -113,24 +118,14 @@ export function ExploreScreenWithGeo() {
       // If online, cache the mess data for offline use
       if (isOnline && offlineManager) {
         try {
-          // Store each mess in the offline database
+          // Store each mess in the offline database with correct signature
           for (const mess of messData) {
-            await offlineManager.storeData({
-              id: `mess-${mess.id}`,
-              type: "mess",
-              data: mess,
-              timestamp: Date.now(),
-            })
+            offlineManager.storeData("mess", mess)
           }
 
           // Store unclaimed mess data
           for (const mess of unclaimedMessData) {
-            await offlineManager.storeData({
-              id: `unclaimed-mess-${mess.id}`,
-              type: "mess",
-              data: mess,
-              timestamp: Date.now(),
-            })
+            offlineManager.storeData("mess", mess)
           }
         } catch (error) {
           console.error("Error caching mess data:", error)
@@ -140,11 +135,10 @@ export function ExploreScreenWithGeo() {
       // If offline, try to load cached data
       if (!isOnline && offlineManager) {
         try {
-          const cachedMesses = await offlineManager.getAllDataByType("mess")
+          const cachedMesses = offlineManager.getAllDataByType("mess")
           if (cachedMesses.length > 0) {
-            const claimed = cachedMesses.filter((item) => !item.data.isUnclaimed).map((item) => item.data)
-
-            const unclaimed = cachedMesses.filter((item) => item.data.isUnclaimed).map((item) => item.data)
+            const claimed = cachedMesses.filter((item) => !item.isUnclaimed)
+            const unclaimed = cachedMesses.filter((item) => item.isUnclaimed)
 
             if (claimed.length > 0) setMesses(claimed)
             if (unclaimed.length > 0) setUnclaimedMesses(unclaimed)

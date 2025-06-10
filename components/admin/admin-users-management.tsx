@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useEffect, useState } from "react"
@@ -94,10 +95,13 @@ export default function AdminUsersManagement() {
       const mergedUsers =
         profiles?.map((profile) => {
           const authUser = authUsers?.users.find((u) => u.id === profile.id)
+          // Check if user is banned by looking at ban_duration or user_metadata
+          const isBanned = authUser?.user_metadata?.banned || 
+                          (authUser?.banned_until && new Date(authUser.banned_until) > new Date())
           return {
             ...profile,
             last_sign_in: authUser?.last_sign_in_at,
-            is_blocked: authUser?.banned_until ? new Date(authUser.banned_until) > new Date() : false,
+            is_blocked: isBanned || false,
           }
         }) || []
 
@@ -149,18 +153,15 @@ export default function AdminUsersManagement() {
     setActionLoading(userId)
     try {
       if (block) {
-        // Ban user for 100 years (effectively permanent)
-        const banUntil = new Date()
-        banUntil.setFullYear(banUntil.getFullYear() + 100)
-
+        // Update user metadata to mark as banned
         const { error } = await supabase.auth.admin.updateUserById(userId, {
-          banned_until: banUntil.toISOString(),
+          user_metadata: { banned: true },
         })
         if (error) throw error
       } else {
-        // Unban user
+        // Remove ban from user metadata
         const { error } = await supabase.auth.admin.updateUserById(userId, {
-          banned_until: "none",
+          user_metadata: { banned: false },
         })
         if (error) throw error
       }

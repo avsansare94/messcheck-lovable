@@ -1,3 +1,4 @@
+
 "use client"
 
 import type React from "react"
@@ -8,6 +9,8 @@ import type { User } from "@supabase/supabase-js"
 interface UserContextType {
   user: User | null
   loading: boolean
+  setUser: (user: User | null) => void
+  logout: () => Promise<void>
   signOut: () => Promise<void>
 }
 
@@ -57,7 +60,13 @@ export function UserContextProvider({ children }: { children: React.ReactNode })
     }
   }
 
-  return <UserContext.Provider value={{ user, loading, signOut }}>{children}</UserContext.Provider>
+  const logout = signOut // Alias for compatibility
+
+  return (
+    <UserContext.Provider value={{ user, loading, setUser, logout, signOut }}>
+      {children}
+    </UserContext.Provider>
+  )
 }
 
 export function useUser() {

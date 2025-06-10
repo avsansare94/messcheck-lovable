@@ -82,7 +82,6 @@ export function QRCodeGenerator({
             size={200}
             level="H"
             includeMargin={true}
-            renderAs="svg"
             imageSettings={{
               src: "/icon-192.png",
               x: undefined,
