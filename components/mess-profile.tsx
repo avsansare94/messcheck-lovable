@@ -342,6 +342,30 @@ const messDetails = {
   },
 }
 
+const MenuSkeleton = () => (
+  <div className="space-y-3 p-4">
+    <Skeleton className="h-4 w-1/2" />
+    <Skeleton className="h-4 w-2/3" />
+    <Skeleton className="h-4 w-1/3" />
+    <Skeleton className="h-4 w-1/2" />
+  </div>
+)
+
+const RatingsSkeleton = () => (
+  <div className="space-y-4">
+    <div className="grid grid-cols-2 gap-4">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <div key={i} className="flex items-center gap-2">
+          <Skeleton className="h-4 w-4" />
+          <Skeleton className="h-4 w-16" />
+          <Skeleton className="h-2 flex-1" />
+          <Skeleton className="h-4 w-8" />
+        </div>
+      ))}
+    </div>
+  </div>
+)
+
 export function MessProfile({ slug }: { slug: string }) {
   const [loading, setLoading] = useState(true)
   const [isFavorite, setIsFavorite] = useState(false)
@@ -930,4 +954,126 @@ export function MessProfile({ slug }: { slug: string }) {
                 className="mr-2 text-red-500"
               >
                 <path
-                  d="M3.5 2C3.22386 2 3 2.223
+                  d="M3.5 2C3.22386 2 3 2.22386 3 2.5V12.5C3 12.7761 3.22386 13 3.5 13H11.5C11.7761 13 12 12.7761 12 12.5V2.5C12 2.22386 11.7761 2 11.5 2H3.5ZM2 2.5C2 1.67157 2.67157 1 3.5 1H11.5C12.3284 1 13 1.67157 13 2.5V12.5C13 13.3284 12.3284 14 11.5 14H3.5C2.67157 14 2 13.3284 2 12.5V2.5ZM4.5 4C4.22386 4 4 4.22386 4 4.5C4 4.77614 4.22386 5 4.5 5H10.5C10.7761 5 11 4.77614 11 4.5C11 4.22386 10.7761 4 10.5 4H4.5ZM4.5 7C4.22386 7 4 7.22386 4 7.5C4 7.77614 4.22386 8 4.5 8H10.5C10.7761 8 11 7.77614 11 7.5C11 7.22386 10.7761 7 10.5 7H4.5ZM4.5 10C4.22386 10 4 10.2239 4 10.5C4 10.7761 4.22386 11 4.5 11H10.5C10.7761 11 11 10.7761 11 10.5C11 10.2239 10.7761 10 10.5 10H4.5Z"
+                  fill="currentColor"
+                  fillRule="evenodd"
+                  clipRule="evenodd"
+                ></path>
+              </svg>
+              Subscription Plans
+            </h2>
+            <div className="grid gap-3">
+              {messData.plans.map((plan) => (
+                <div key={plan.id} className="border rounded-lg p-3 hover:border-red-200 cursor-pointer">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h3 className="font-medium">{plan.name}</h3>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-semibold text-red-600">{plan.price}</div>
+                      <Button
+                        size="sm"
+                        className="mt-1 bg-red-600 hover:bg-red-700"
+                        onClick={() => handleSelectPlan(plan.id)}
+                      >
+                        Subscribe
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Payment Dialog */}
+      <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Subscribe to {messData.name}</DialogTitle>
+            <DialogDescription>
+              {selectedPlanDetails && (
+                <>
+                  You're subscribing to the <strong>{selectedPlanDetails.name}</strong> plan for{" "}
+                  <strong>{selectedPlanDetails.price}</strong>.
+                </>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-sm text-gray-600">
+              By subscribing, you'll get access to fresh, hygienic meals delivered on time.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPaymentDialog(false)}>
+              Cancel
+            </Button>
+            <Button className="bg-red-600 hover:bg-red-700">Pay Now</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Claim Dialog */}
+      <Dialog open={showClaimDialog} onOpenChange={setShowClaimDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Claim Your Business</DialogTitle>
+            <DialogDescription>
+              Are you the owner of {messData.name}? Claim it to manage your listing, respond to reviews, and update
+              your information.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-sm text-gray-600">
+              To claim this business, you'll need to verify your ownership through a verification process.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowClaimDialog(false)}>
+              Cancel
+            </Button>
+            <Button className="bg-red-600 hover:bg-red-700">Start Claim Process</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Share Dialog */}
+      <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Share {messData.name}</DialogTitle>
+            <DialogDescription>Choose how you'd like to share this mess with others.</DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-3">
+            <Button
+              variant="outline"
+              className="w-full justify-start"
+              onClick={() => window.open(getWhatsAppShareLink(), "_blank")}
+            >
+              <MessageSquare className="mr-2 h-4 w-4 text-green-600" />
+              Share on WhatsApp
+            </Button>
+            <Button
+              variant="outline"
+              className="w-full justify-start"
+              onClick={() => window.open(getSMSShareLink(), "_blank")}
+            >
+              <Phone className="mr-2 h-4 w-4 text-blue-600" />
+              Share via SMS
+            </Button>
+            <Button variant="outline" className="w-full justify-start" onClick={copyShareText}>
+              {copied ? (
+                <Check className="mr-2 h-4 w-4 text-green-600" />
+              ) : (
+                <Copy className="mr-2 h-4 w-4 text-gray-600" />
+              )}
+              {copied ? "Copied!" : "Copy Link"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  )
+}
