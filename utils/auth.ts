@@ -1,17 +1,18 @@
+
 "use client"
 
-import { useRouter } from "next/navigation"
+import { useNavigate } from "react-router-dom"
 import { clearAuthState } from "@/lib/supabase"
 
 export function useLogout() {
-  const router = useRouter()
+  const navigate = useNavigate()
 
   const logout = async () => {
     // Use the centralized auth state clearing function
     await clearAuthState()
 
     // Redirect to login
-    router.push("/login")
+    navigate("/login")
   }
 
   return { logout }
