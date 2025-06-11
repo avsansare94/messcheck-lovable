@@ -23,12 +23,20 @@ export function UserContextProvider({ children }: { children: React.ReactNode })
   }
 
   const logout = (): Promise<void> => {
-    testLogout()
+    try {
+      testLogout()
+    } catch (error) {
+      console.error("Logout error:", error)
+    }
     return Promise.resolve()
   }
 
   const signOut = (): Promise<void> => {
-    testSignOut()
+    try {
+      testSignOut()
+    } catch (error) {
+      console.error("SignOut error:", error)
+    }
     return Promise.resolve()
   }
 
