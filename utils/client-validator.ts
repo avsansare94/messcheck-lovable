@@ -1,3 +1,4 @@
+
 // Utility to validate that we're using the correct client instance
 import { supabase } from "@/lib/supabase/client"
 
@@ -24,7 +25,7 @@ export function validateSupabaseClient() {
 }
 
 // Run validation in development
-if (process.env.NODE_ENV === "development" && typeof window !== "undefined") {
+if (import.meta.env?.MODE === "development" && typeof window !== "undefined") {
   // Delay validation to ensure client is initialized
   setTimeout(() => {
     validateSupabaseClient()

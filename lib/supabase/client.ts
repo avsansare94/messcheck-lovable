@@ -1,8 +1,9 @@
+
 import { createClient as createSupabaseClient } from "@supabase/supabase-js"
 import type { Database } from "@/types/database"
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabaseUrl = import.meta.env?.VITE_SUPABASE_URL!
+const supabaseAnonKey = import.meta.env?.VITE_SUPABASE_ANON_KEY!
 
 // Singleton pattern to prevent multiple client instances
 let supabaseClient: ReturnType<typeof createSupabaseClient<Database>> | null = null
@@ -29,7 +30,7 @@ export function createClient() {
   })
 
   // Log client creation in development
-  if (process.env.NODE_ENV === "development") {
+  if (import.meta.env?.MODE === "development") {
     console.log("✅ Supabase client created (singleton)")
   }
 
