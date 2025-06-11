@@ -25,7 +25,7 @@ export function validateSupabaseClient() {
 }
 
 // Run validation in development
-if (import.meta.env?.MODE === "development" && typeof window !== "undefined") {
+if (import.meta.env.MODE === "development" && typeof window !== "undefined") {
   // Delay validation to ensure client is initialized
   setTimeout(() => {
     validateSupabaseClient()
