@@ -1,65 +1,48 @@
 
 "use client"
 
-import { Link, useLocation } from "react-router-dom"
-import { Home, Search, QrCode, Settings } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { useLanguage } from "@/components/language-context-provider"
+import React from "react"
+import { useNavigate, useLocation } from "react-router-dom"
+import { Button } from "@/components/ui/button"
+import { Home, Search, User, Settings } from "lucide-react"
 
 interface BottomNavigationProps {
-  activeTab?: string
+  activeTab: string
 }
 
 export function BottomNavigation({ activeTab }: BottomNavigationProps) {
-  const { t } = useLanguage()
+  const navigate = useNavigate()
   const location = useLocation()
 
   const tabs = [
-    {
-      name: "home",
-      href: "/home",
-      label: t("nav.home"),
-      icon: Home,
-    },
-    {
-      name: "explore",
-      href: "/explore",
-      label: t("nav.explore"),
-      icon: Search,
-    },
-    {
-      name: "mymess",
-      href: "/my-mess",
-      label: t("nav.mymess"),
-      icon: QrCode,
-    },
-    {
-      name: "settings",
-      href: "/settings",
-      label: t("nav.settings"),
-      icon: Settings,
-    },
+    { id: "home", label: "Home", icon: Home, path: "/" },
+    { id: "explore", label: "Explore", icon: Search, path: "/explore" },
+    { id: "profile", label: "Profile", icon: User, path: "/profile" },
+    { id: "settings", label: "Settings", icon: Settings, path: "/settings" }
   ]
 
-  // Determine active tab from current location if not provided
-  const currentActiveTab = activeTab || tabs.find(tab => location.pathname === tab.href)?.name || "home"
-
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-10 bg-white border-t border-gray-200">
-      <div className="flex justify-around items-center h-16 max-w-md mx-auto">
-        {tabs.map((tab) => (
-          <Link
-            key={tab.name}
-            to={tab.href}
-            className={cn(
-              "flex flex-col items-center justify-center w-full h-full",
-              currentActiveTab === tab.name ? "text-red-600" : "text-gray-500",
-            )}
-          >
-            <tab.icon className={cn("h-5 w-5", currentActiveTab === tab.name ? "text-red-600" : "text-gray-500")} />
-            <span className="text-xs mt-1">{tab.label}</span>
-          </Link>
-        ))}
+    <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg">
+      <div className="grid grid-cols-4 gap-1 p-2">
+        {tabs.map((tab) => {
+          const Icon = tab.icon
+          const isActive = activeTab === tab.id || location.pathname === tab.path
+          
+          return (
+            <Button
+              key={tab.id}
+              variant="ghost"
+              size="sm"
+              className={`flex flex-col items-center gap-1 h-auto py-2 ${
+                isActive ? "text-red-600" : "text-gray-600"
+              }`}
+              onClick={() => navigate(tab.path)}
+            >
+              <Icon className="h-5 w-5" />
+              <span className="text-xs">{tab.label}</span>
+            </Button>
+          )
+        })}
       </div>
     </div>
   )
