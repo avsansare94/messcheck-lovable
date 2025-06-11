@@ -9,9 +9,10 @@ export function useErrorReporting() {
 
   const reportError = useCallback(
     (error: Error, componentInfo?: string, additionalContext?: Record<string, any>) => {
-      // Log to console in development
-      if (import.meta.env?.MODE !== "production") {
-        console.error(`Error in ${componentInfo || "unknown component"}:`, error)
+      // Log to console for debugging
+      console.error(`Error in ${componentInfo || "unknown component"}:`, error)
+      if (additionalContext) {
+        console.error("Additional context:", additionalContext)
       }
 
       // Don't report redirect errors as they are expected behavior
@@ -33,9 +34,7 @@ export function useErrorReporting() {
   )
 
   const logEvent = useCallback((message: string, category?: string, data?: Record<string, any>) => {
-    if (import.meta.env?.MODE !== "production") {
-      console.log(`Event: ${message}`, { category, data })
-    }
+    console.log(`Event: ${message}`, { category, data })
   }, [])
 
   return { reportError, logEvent }

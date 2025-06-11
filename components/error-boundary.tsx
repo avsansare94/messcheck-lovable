@@ -1,9 +1,9 @@
+
 "use client"
 
 import { Component, type ErrorInfo, type ReactNode } from "react"
 import { Button } from "@/components/ui/button"
 import { AlertTriangle, RefreshCw } from "lucide-react"
-import { captureException } from "@/lib/sentry"
 
 interface ErrorBoundaryProps {
   children: ReactNode
@@ -33,15 +33,10 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
-    // You can log the error to an error reporting service
+    // Log the error to console for debugging
     console.error("Error caught by ErrorBoundary:", error, errorInfo)
-
-    // Send to Sentry with component information
-    captureException(error, {
-      componentName: this.props.componentName || "Unknown",
-      react: errorInfo,
-      componentStack: errorInfo.componentStack,
-    })
+    console.error("Component stack:", errorInfo.componentStack)
+    console.error("Component name:", this.props.componentName || "Unknown")
 
     // Call the onError callback if provided
     if (this.props.onError) {

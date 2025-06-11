@@ -2,8 +2,6 @@
 "use client"
 
 import { useEffect, type ReactNode } from "react"
-import * as Sentry from "@sentry/react"
-import { addBreadcrumb } from "@/lib/sentry"
 
 interface GlobalErrorHandlerProps {
   children: ReactNode
@@ -14,21 +12,14 @@ export function GlobalErrorHandler({ children }: GlobalErrorHandlerProps) {
     // Handler for unhandled promise rejections
     const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
       console.error("Unhandled Promise Rejection:", event.reason)
-
-      // Send to Sentry
-      Sentry.captureException(event.reason)
+      
+      // Prevent the default browser error handler
+      event.preventDefault()
     }
 
     // Handler for uncaught exceptions
     const handleError = (event: ErrorEvent) => {
       console.error("Uncaught error:", event.error || event.message)
-
-      // Send to Sentry
-      if (event.error) {
-        Sentry.captureException(event.error)
-      } else {
-        Sentry.captureMessage(`Uncaught error: ${event.message}`)
-      }
 
       // Prevent the default browser error handler
       event.preventDefault()
@@ -36,7 +27,7 @@ export function GlobalErrorHandler({ children }: GlobalErrorHandlerProps) {
 
     // Add navigation breadcrumbs for React Router
     const handleRouteChange = (url: string) => {
-      addBreadcrumb(`Navigation to ${url}`, "navigation", { to: url })
+      console.log(`Navigation to ${url}`)
     }
 
     // Add listeners
