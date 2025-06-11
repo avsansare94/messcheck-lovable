@@ -1,116 +1,131 @@
+
 "use client"
 
-import type React from "react"
 import { useState } from "react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
-import { toast } from "@/components/ui/use-toast"
-import Link from "next/link"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { useToast } from "@/hooks/use-toast"
+import { Building, MapPin, Clock, Users } from "lucide-react"
 
 export default function BusinessSettings() {
-  const [isLoading, setIsLoading] = useState(false)
-  const [settings, setSettings] = useState({
-    cuisineType: "veg",
-    servingType: "both",
-    openDays: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday"],
-    autoAcceptSubscriptions: true,
-    showMenuPublicly: true,
-    allowReviews: true,
-    allowOfflineCheckIn: true,
-    businessDescription: "We serve delicious home-cooked meals with a focus on nutrition and taste.",
-    specialInstructions: "Please inform us about any allergies or dietary restrictions.",
+  const [businessInfo, setBusinessInfo] = useState({
+    messName: "Sharma's Tiffin Service",
+    address: "123 Main Street, Block A",
+    city: "Mumbai",
+    state: "Maharashtra",
+    pincode: "400001",
+    operatingHours: "8:00 AM - 10:00 PM",
+    capacity: "50",
   })
+  
+  const { toast } = useToast()
 
-  const handleCuisineChange = (value: string) => {
-    setSettings((prev) => ({ ...prev, cuisineType: value }))
-  }
-
-  const handleServingChange = (value: string) => {
-    setSettings((prev) => ({ ...prev, servingType: value }))
-  }
-
-  const handleDayToggle = (day: string) => {
-    setSettings((prev) => {
-      const openDays = [...prev.openDays]
-      if (openDays.includes(day)) {
-        return { ...prev, openDays: openDays.filter((d) => d !== day) }
-      } else {
-        return { ...prev, openDays: [...openDays, day] }
-      }
+  const handleSave = () => {
+    // Mock save functionality
+    toast({
+      title: "Business settings updated",
+      description: "Your business information has been saved successfully.",
     })
   }
 
-  const handleToggle = (key: string) => {
-    setSettings((prev) => ({ ...prev, [key]: !prev[key as keyof typeof prev] }))
-  }
-
-  const handleTextChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setSettings((prev) => ({ ...prev, [name]: value }))
-  }
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false)
-      toast({
-        title: "Business settings updated",
-        description: "Your business settings have been saved successfully.",
-      })
-    }, 1000)
-  }
-
-  const days = [
-    { id: "monday", label: "Monday" },
-    { id: "tuesday", label: "Tuesday" },
-    { id: "wednesday", label: "Wednesday" },
-    { id: "thursday", label: "Thursday" },
-    { id: "friday", label: "Friday" },
-    { id: "saturday", label: "Saturday" },
-    { id: "sunday", label: "Sunday" },
-  ]
-
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-semibold">Business Settings</h2>
-        <p className="text-sm text-gray-500">Manage your mess business settings and preferences</p>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Building className="h-5 w-5" />
+            Business Information
+          </CardTitle>
+          <CardDescription>
+            Update your mess details and business information
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="messName">Mess Name</Label>
+            <Input
+              id="messName"
+              value={businessInfo.messName}
+              onChange={(e) => setBusinessInfo({ ...businessInfo, messName: e.target.value })}
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="address">Address</Label>
+            <Input
+              id="address"
+              value={businessInfo.address}
+              onChange={(e) => setBusinessInfo({ ...businessInfo, address: e.target.value })}
+            />
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="city">City</Label>
+              <Input
+                id="city"
+                value={businessInfo.city}
+                onChange={(e) => setBusinessInfo({ ...businessInfo, city: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="state">State</Label>
+              <Input
+                id="state"
+                value={businessInfo.state}
+                onChange={(e) => setBusinessInfo({ ...businessInfo, state: e.target.value })}
+              />
+            </div>
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="pincode">Pincode</Label>
+            <Input
+              id="pincode"
+              value={businessInfo.pincode}
+              onChange={(e) => setBusinessInfo({ ...businessInfo, pincode: e.target.value })}
+            />
+          </div>
+        </CardContent>
+      </Card>
 
-      <Separator />
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Clock className="h-5 w-5" />
+            Operating Details
+          </CardTitle>
+          <CardDescription>
+            Set your operating hours and capacity
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="hours">Operating Hours</Label>
+            <Input
+              id="hours"
+              value={businessInfo.operatingHours}
+              onChange={(e) => setBusinessInfo({ ...businessInfo, operatingHours: e.target.value })}
+              placeholder="e.g., 8:00 AM - 10:00 PM"
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="capacity">Seating Capacity</Label>
+            <Input
+              id="capacity"
+              type="number"
+              value={businessInfo.capacity}
+              onChange={(e) => setBusinessInfo({ ...businessInfo, capacity: e.target.value })}
+            />
+          </div>
+        </CardContent>
+      </Card>
 
-      <div className="grid grid-cols-2 gap-4">
-        <Link href="/settings/cuisine-type" className="bg-white p-4 rounded shadow">
-          <h3 className="text-lg font-medium">Cuisine Type</h3>
-          <p className="text-sm text-gray-500">Choose your preferred cuisine type</p>
-        </Link>
-        <Link href="/settings/serving-type" className="bg-white p-4 rounded shadow">
-          <h3 className="text-lg font-medium">Serving Type</h3>
-          <p className="text-sm text-gray-500">Select the type of serving you offer</p>
-        </Link>
-        <Link href="/settings/open-days" className="bg-white p-4 rounded shadow">
-          <h3 className="text-lg font-medium">Open Days</h3>
-          <p className="text-sm text-gray-500">Set the days your mess is open</p>
-        </Link>
-        <Link href="/settings/business-description" className="bg-white p-4 rounded shadow">
-          <h3 className="text-lg font-medium">Business Description</h3>
-          <p className="text-sm text-gray-500">Describe your mess business</p>
-        </Link>
-        <Link href="/settings/special-instructions" className="bg-white p-4 rounded shadow">
-          <h3 className="text-lg font-medium">Special Instructions</h3>
-          <p className="text-sm text-gray-500">Provide any special instructions for your customers</p>
-        </Link>
-        <Link href="/settings/business-preferences" className="bg-white p-4 rounded shadow">
-          <h3 className="text-lg font-medium">Business Preferences</h3>
-          <p className="text-sm text-gray-500">Manage additional business preferences</p>
-        </Link>
-      </div>
-
-      <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading ? "Saving..." : "Save Business Settings"}
+      <Button onClick={handleSave} className="w-full">
+        Save Business Settings
       </Button>
     </div>
   )

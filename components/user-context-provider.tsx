@@ -2,14 +2,13 @@
 "use client"
 
 import type React from "react"
-import { createContext, useContext, useEffect, useState } from "react"
-import { supabase } from "@/lib/supabase/client"
-import type { User } from "@supabase/supabase-js"
+import { createContext, useContext } from "react"
+import { useTestAuth } from "@/lib/test-auth-context"
 
 interface UserContextType {
-  user: User | null
+  user: any
   loading: boolean
-  setUser: (user: User | null) => void
+  setUser: (user: any) => void
   logout: () => Promise<void>
   signOut: () => Promise<void>
 }
@@ -17,50 +16,11 @@ interface UserContextType {
 const UserContext = createContext<UserContextType | undefined>(undefined)
 
 export function UserContextProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
+  const { user, loading, logout, signOut } = useTestAuth()
 
-  useEffect(() => {
-    // Get initial session
-    const getInitialSession = async () => {
-      try {
-        const {
-          data: { session },
-        } = await supabase.auth.getSession()
-        setUser(session?.user ?? null)
-      } catch (error) {
-        console.error("Error getting initial session:", error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    getInitialSession()
-
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("Auth state changed:", event, session?.user?.id)
-      setUser(session?.user ?? null)
-      setLoading(false)
-    })
-
-    return () => {
-      subscription.unsubscribe()
-    }
-  }, [])
-
-  const signOut = async () => {
-    try {
-      await supabase.auth.signOut()
-      setUser(null)
-    } catch (error) {
-      console.error("Error signing out:", error)
-    }
+  const setUser = () => {
+    // No-op in test mode
   }
-
-  const logout = signOut // Alias for compatibility
 
   return (
     <UserContext.Provider value={{ user, loading, setUser, logout, signOut }}>

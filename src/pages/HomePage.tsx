@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { supabase } from "@/lib/supabase/client"
+import { useTestAuth } from "@/lib/test-auth-context"
 import { UserDashboard } from "@/components/user-dashboard"
 import { BottomNavigation } from "@/components/bottom-navigation"
 import { ZomatoLoginScreen } from "@/components/auth/zomato-login-screen"
@@ -9,62 +9,35 @@ import { Loader2 } from "lucide-react"
 
 export default function HomePage() {
   const [isLoading, setIsLoading] = useState(true)
-  const [showLogin, setShowLogin] = useState(false)
-  const [user, setUser] = useState<any>(null)
-  const [profile, setProfile] = useState<any>(null)
+  const { user } = useTestAuth()
   const navigate = useNavigate()
 
   useEffect(() => {
-    async function checkAuth() {
-      try {
-        const {
-          data: { session },
-        } = await supabase.auth.getSession()
+    // Simulate loading time
+    const timer = setTimeout(() => {
+      setIsLoading(false)
+    }, 500)
 
-        if (session?.user) {
-          setUser(session.user)
-          // Check if user has a complete profile
-          const { data: profileData } = await supabase
-            .from("profiles")
-            .select("role, email, full_name")
-            .eq("id", session.user.id)
-            .single()
+    return () => clearTimeout(timer)
+  }, [])
 
-          if (profileData?.role) {
-            setProfile(profileData)
-            // Redirect to appropriate dashboard
-            switch (profileData.role) {
-              case "admin":
-                navigate("/admin/dashboard")
-                return
-              case "provider":
-                navigate("/provider/dashboard")
-                return
-              case "user":
-              default:
-                // Show user dashboard for users
-                break
-            }
-          } else {
-            // User exists but no complete profile, redirect to onboarding
-            navigate("/onboarding")
-            return
-          }
-        } else {
-          // No user session, show login
-          setShowLogin(true)
-        }
-      } catch (error) {
-        console.error("Auth check error:", error)
-        // On error, show login
-        setShowLogin(true)
-      } finally {
-        setIsLoading(false)
+  useEffect(() => {
+    if (!isLoading && user) {
+      // Redirect based on role
+      switch (user.role) {
+        case "admin":
+          navigate("/admin/dashboard")
+          return
+        case "mess-provider":
+          navigate("/provider/home")
+          return
+        case "mess-user":
+        default:
+          // Stay on home page for mess users
+          break
       }
     }
-
-    checkAuth()
-  }, [navigate])
+  }, [user, isLoading, navigate])
 
   if (isLoading) {
     return (
@@ -80,12 +53,8 @@ export default function HomePage() {
     )
   }
 
-  if (showLogin) {
-    return <ZomatoLoginScreen />
-  }
-
-  // Show user dashboard for authenticated users
-  if (user && profile?.role === "user") {
+  // Show user dashboard for mess users
+  if (user?.role === "mess-user") {
     return (
       <main className="pb-16">
         <UserDashboard />
@@ -94,6 +63,6 @@ export default function HomePage() {
     )
   }
 
-  // Fallback
+  // Fallback - show login screen
   return <ZomatoLoginScreen />
 }

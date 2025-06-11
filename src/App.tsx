@@ -4,9 +4,10 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { ThemeProvider } from "@/components/theme-provider"
 import { NetworkStatus } from "@/components/network-status"
 import { GlobalErrorHandler } from "@/components/global-error-handler"
-import { UserContextProvider } from "@/components/user-context-provider"
+import { TestAuthProvider } from "@/lib/test-auth-context"
 import { LanguageProvider } from "@/components/language-context-provider"
 import { Toaster } from "@/components/ui/toaster"
+import { TestRoleSwitcher } from "@/components/test-role-switcher"
 
 // Import converted page components
 import HomePage from './pages/HomePage'
@@ -28,7 +29,7 @@ function App() {
   return (
     <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
       <LanguageProvider>
-        <UserContextProvider>
+        <TestAuthProvider>
           <GlobalErrorHandler>
             <Router>
               <Routes>
@@ -50,9 +51,10 @@ function App() {
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
               <Toaster />
+              <TestRoleSwitcher />
             </Router>
           </GlobalErrorHandler>
-        </UserContextProvider>
+        </TestAuthProvider>
       </LanguageProvider>
       <NetworkStatus />
     </ThemeProvider>
