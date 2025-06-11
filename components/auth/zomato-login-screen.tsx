@@ -27,7 +27,7 @@ export function ZomatoLoginScreen() {
       if (role === "mess-provider") {
         navigate("/provider/home")
       } else {
-        navigate("/home")
+        navigate("/dashboard")
       }
 
       toast({

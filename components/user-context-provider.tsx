@@ -9,8 +9,8 @@ interface UserContextType {
   user: any
   loading: boolean
   setUser: (user: any) => void
-  logout: () => Promise<void>
-  signOut: () => Promise<void>
+  logout: () => void
+  signOut: () => void
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined)
@@ -22,22 +22,20 @@ export function UserContextProvider({ children }: { children: React.ReactNode })
     // No-op in test mode
   }
 
-  const logout = (): Promise<void> => {
+  const logout = () => {
     try {
       testLogout()
     } catch (error) {
       console.error("Logout error:", error)
     }
-    return Promise.resolve()
   }
 
-  const signOut = (): Promise<void> => {
+  const signOut = () => {
     try {
       testSignOut()
     } catch (error) {
       console.error("SignOut error:", error)
     }
-    return Promise.resolve()
   }
 
   return (
