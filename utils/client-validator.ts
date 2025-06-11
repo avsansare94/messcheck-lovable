@@ -20,6 +20,12 @@ export function validateSupabaseClient() {
     return false
   }
 
+  // Check if we have valid environment variables
+  if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+    console.warn("Supabase environment variables are missing - client may not work properly")
+    return false
+  }
+
   console.log("Supabase client validation passed")
   return true
 }

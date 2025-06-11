@@ -2,10 +2,10 @@
 import { createClient as createSupabaseClient } from "@supabase/supabase-js"
 import type { Database } from "@/types/database"
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "https://placeholder.supabase.co"
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || "placeholder-key"
 
-if (!supabaseUrl || !supabaseAnonKey) {
+if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
   console.warn("Missing Supabase environment variables. Some features may not work.")
 }
 
@@ -16,11 +16,6 @@ export function createClient() {
   // Return existing client if already created
   if (supabaseClient) {
     return supabaseClient
-  }
-
-  // Only create client if we have the required environment variables
-  if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error("Supabase URL and Anon Key are required")
   }
 
   // Create new client with proper configuration
@@ -46,16 +41,11 @@ export function createClient() {
   return supabaseClient
 }
 
-// Export the singleton client only if environment variables are available
-export const supabase = supabaseUrl && supabaseAnonKey ? createClient() : null
+// Export the singleton client - always returns a valid client
+export const supabase = createClient()
 
 // Clear auth state function
 export async function clearAuthState() {
-  if (!supabase) {
-    console.warn("Supabase client not available")
-    return
-  }
-
   try {
     // Sign out from Supabase
     await supabase.auth.signOut()

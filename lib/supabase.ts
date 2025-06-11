@@ -1,4 +1,3 @@
-
 import { createBrowserClient } from "@supabase/ssr"
 import type { Database } from "@/types/database"
 import { createClient, supabase, clearAuthState } from "./supabase/client"
@@ -9,9 +8,12 @@ let supabaseClient: ReturnType<typeof createBrowserClient<Database>> | null = nu
 export function getSupabaseClient() {
   // Only create the client once
   if (!supabaseClient) {
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "https://placeholder.supabase.co"
+    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || "placeholder-key"
+    
     supabaseClient = createBrowserClient<Database>(
-      import.meta.env.VITE_SUPABASE_URL!,
-      import.meta.env.VITE_SUPABASE_ANON_KEY!,
+      supabaseUrl,
+      supabaseAnonKey,
       {
         auth: {
           persistSession: true,
@@ -28,16 +30,11 @@ export function getSupabaseClient() {
 // Export the singleton instance
 export { supabase }
 
-// Utility function to clear all auth state on logout
-// This function is now re-exported from './supabase/client'
-
-// This file now simply re-exports from the main client to avoid duplication
 // Re-export the singleton client for backward compatibility
 export { createClient, clearAuthState }
 
 // Keep backward compatibility
 export const getSupabaseClientCompat = () => {
-  const { createClient } = require("./supabase/client")
   return createClient()
 }
 
