@@ -16,18 +16,18 @@ interface UserContextType {
 const UserContext = createContext<UserContextType | undefined>(undefined)
 
 export function UserContextProvider({ children }: { children: React.ReactNode }) {
-  const { user, loading, logout, signOut } = useTestAuth()
+  const { user, loading, logout: testLogout, signOut: testSignOut } = useTestAuth()
 
   const setUser = () => {
     // No-op in test mode
   }
 
   const asyncLogout = async () => {
-    logout()
+    testLogout()
   }
 
   const asyncSignOut = async () => {
-    signOut()
+    testSignOut()
   }
 
   return (
