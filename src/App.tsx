@@ -6,6 +6,7 @@ import { NetworkStatus } from "@/components/network-status"
 import { GlobalErrorHandler } from "@/components/global-error-handler"
 import { UserContextProvider } from "@/components/user-context-provider"
 import { LanguageProvider } from "@/components/language-context-provider"
+import { Toaster } from "@/components/ui/toaster"
 
 // Import converted page components
 import HomePage from './pages/HomePage'
@@ -48,6 +49,7 @@ function App() {
                 <Route path="/unauthorized" element={<UnauthorizedPage />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
+              <Toaster />
             </Router>
           </GlobalErrorHandler>
         </UserContextProvider>
