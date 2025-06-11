@@ -23,11 +23,11 @@ export function UserContextProvider({ children }: { children: React.ReactNode })
   }
 
   const logout = async () => {
-    await Promise.resolve(testLogout())
+    testLogout()
   }
 
   const signOut = async () => {
-    await Promise.resolve(testSignOut())
+    testSignOut()
   }
 
   return (
