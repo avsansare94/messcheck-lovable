@@ -1,12 +1,12 @@
 
 import React from "react"
-import { ExploreScreen } from "@/components/explore-screen"
+import { ExploreScreenWithErrorBoundary } from "@/components/explore-screen-with-error-boundary"
 import { BottomNavigation } from "@/components/bottom-navigation"
 
 export default function ExplorePage() {
   return (
     <main className="pb-16">
-      <ExploreScreen />
+      <ExploreScreenWithErrorBoundary />
       <BottomNavigation activeTab="explore" />
     </main>
   )
