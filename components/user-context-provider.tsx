@@ -22,16 +22,16 @@ export function UserContextProvider({ children }: { children: React.ReactNode })
     // No-op in test mode
   }
 
-  const asyncLogout = async () => {
+  const logout = async () => {
     testLogout()
   }
 
-  const asyncSignOut = async () => {
+  const signOut = async () => {
     testSignOut()
   }
 
   return (
-    <UserContext.Provider value={{ user, loading, setUser, logout: asyncLogout, signOut: asyncSignOut }}>
+    <UserContext.Provider value={{ user, loading, setUser, logout, signOut }}>
       {children}
     </UserContext.Provider>
   )
