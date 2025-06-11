@@ -1,6 +1,4 @@
 
-"use client"
-
 import { ExploreScreen } from "./explore-screen"
 import { withErrorBoundary } from "./with-error-boundary"
 import { useErrorReporting } from "@/hooks/use-error-reporting"

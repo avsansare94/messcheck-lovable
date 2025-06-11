@@ -1,6 +1,4 @@
 
-"use client"
-
 import { MessProfile } from "./mess-profile"
 import { withErrorBoundary } from "./with-error-boundary"
 import { useErrorReporting } from "@/hooks/use-error-reporting"
