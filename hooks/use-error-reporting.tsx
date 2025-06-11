@@ -10,7 +10,7 @@ export function useErrorReporting() {
   const reportError = useCallback(
     (error: Error, componentInfo?: string, additionalContext?: Record<string, any>) => {
       // Log to console in development
-      if (import.meta.env.MODE !== "production") {
+      if (import.meta.env?.MODE !== "production") {
         console.error(`Error in ${componentInfo || "unknown component"}:`, error)
       }
 
@@ -33,7 +33,7 @@ export function useErrorReporting() {
   )
 
   const logEvent = useCallback((message: string, category?: string, data?: Record<string, any>) => {
-    if (import.meta.env.MODE !== "production") {
+    if (import.meta.env?.MODE !== "production") {
       console.log(`Event: ${message}`, { category, data })
     }
   }, [])

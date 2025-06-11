@@ -3,8 +3,8 @@ import * as Sentry from "@sentry/react"
 
 // Initialize Sentry for React
 Sentry.init({
-  dsn: import.meta.env.VITE_SENTRY_DSN || "",
-  environment: import.meta.env.MODE || "development",
+  dsn: import.meta.env?.VITE_SENTRY_DSN || "",
+  environment: import.meta.env?.MODE || "development",
   integrations: [
     Sentry.browserTracingIntegration(),
     Sentry.replayIntegration({
@@ -16,7 +16,7 @@ Sentry.init({
   replaysSessionSampleRate: 0.1,
   replaysOnErrorSampleRate: 1.0,
   // Only initialize if DSN is provided
-  enabled: !!import.meta.env.VITE_SENTRY_DSN,
+  enabled: !!(import.meta.env?.VITE_SENTRY_DSN),
 })
 
 // Helper function to add breadcrumbs
@@ -46,7 +46,7 @@ export const setUser = (user: { id: string; email?: string; username?: string })
   Sentry.setUser(user)
 }
 
-// Helper function to set tags
+// Helper function to set tag
 export const setTag = (key: string, value: string) => {
   Sentry.setTag(key, value)
 }
