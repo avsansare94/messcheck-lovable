@@ -22,12 +22,12 @@ export function UserContextProvider({ children }: { children: React.ReactNode })
     // No-op in test mode
   }
 
-  const logout = async (): Promise<void> => {
+  const logout = (): Promise<void> => {
     testLogout()
     return Promise.resolve()
   }
 
-  const signOut = async (): Promise<void> => {
+  const signOut = (): Promise<void> => {
     testSignOut()
     return Promise.resolve()
   }
