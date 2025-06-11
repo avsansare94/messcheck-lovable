@@ -18,4 +18,8 @@ export default defineConfig(({ mode }: { mode: string }) => ({
       "@": path.resolve(__dirname, "./"),
     },
   },
+  define: {
+    // Ensure process.env is available for compatibility
+    'process.env': {},
+  },
 }))
