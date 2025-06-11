@@ -1,7 +1,8 @@
+
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -12,7 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Award, LogOut, ChevronRight } from "lucide-react"
 
 export function ProfileScreen() {
-  const router = useRouter()
+  const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
   const [userData, setUserData] = useState({
     name: "Avinash Sansare",
@@ -36,7 +37,7 @@ export function ProfileScreen() {
     localStorage.removeItem("userData")
 
     // Redirect to role selection
-    router.push("/")
+    navigate("/")
   }
 
   return (
