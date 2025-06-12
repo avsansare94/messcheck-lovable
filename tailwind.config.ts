@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss"
 
 const config = {
@@ -25,13 +26,27 @@ const config = {
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+        // Zomato-inspired color palette
+        zomato: {
+          red: "#E23744",
+          "red-dark": "#CB202D",
+          "red-light": "#FF6B7A",
+          orange: "#FF7E00",
+          "orange-light": "#FFB366",
+          "gray-100": "#F8F9FA",
+          "gray-200": "#F1F3F5",
+          "gray-300": "#E5E7EA",
+          "gray-500": "#9BA3AF",
+          "gray-700": "#4A5568",
+          "gray-900": "#1A202C",
+        },
         primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
+          DEFAULT: "#E23744",
+          foreground: "#FFFFFF",
         },
         secondary: {
-          DEFAULT: "hsl(var(--secondary))",
-          foreground: "hsl(var(--secondary-foreground))",
+          DEFAULT: "#F8F9FA",
+          foreground: "#4A5568",
         },
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
@@ -42,8 +57,8 @@ const config = {
           foreground: "hsl(var(--muted-foreground))",
         },
         accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
+          DEFAULT: "#FF7E00",
+          foreground: "#FFFFFF",
         },
         popover: {
           DEFAULT: "hsl(var(--popover))",
@@ -54,10 +69,20 @@ const config = {
           foreground: "hsl(var(--card-foreground))",
         },
       },
+      fontFamily: {
+        sans: ["Inter", "system-ui", "sans-serif"],
+        display: ["Poppins", "Inter", "system-ui", "sans-serif"],
+      },
       borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        lg: "12px",
+        md: "8px",
+        sm: "6px",
+      },
+      boxShadow: {
+        "zomato": "0 2px 8px rgba(226, 55, 68, 0.15)",
+        "zomato-lg": "0 4px 20px rgba(226, 55, 68, 0.2)",
+        "card": "0 1px 3px rgba(0, 0, 0, 0.1)",
+        "card-hover": "0 4px 12px rgba(0, 0, 0, 0.15)",
       },
       keyframes: {
         "accordion-down": {
@@ -68,10 +93,20 @@ const config = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        "fade-in": {
+          "0%": { opacity: "0", transform: "translateY(10px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" }
+        },
+        "scale-in": {
+          "0%": { transform: "scale(0.95)", opacity: "0" },
+          "100%": { transform: "scale(1)", opacity: "1" }
+        }
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "fade-in": "fade-in 0.3s ease-out",
+        "scale-in": "scale-in 0.2s ease-out",
       },
     },
   },

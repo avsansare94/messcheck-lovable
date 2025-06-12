@@ -15,6 +15,7 @@ import ExplorePage from './pages/ExplorePage'
 import MyMessPage from './pages/MyMessPage'
 import SettingsPage from './pages/SettingsPage'
 import ProfilePage from './pages/ProfilePage'
+import ScannerPage from './pages/ScannerPage'
 import AdminDashboardPage from './pages/AdminDashboardPage'
 import UserDashboardPage from './pages/UserDashboardPage'
 import ProviderHomePage from './pages/ProviderHomePage'
@@ -36,6 +37,7 @@ function App() {
           <Route path="/my-mess" element={<MyMessPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/scanner" element={<ScannerPage />} />
           <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
           <Route path="/user/dashboard" element={<UserDashboardPage />} />
           <Route path="/provider/home" element={<ProviderHomePage />} />
