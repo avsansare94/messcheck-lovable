@@ -19,7 +19,7 @@ export default function ProviderDashboardPage() {
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-6">Provider Dashboard</h1>
-      <p className="mb-4">Welcome, {user.name}!</p>
+      <p className="mb-4">Welcome, {user.full_name}!</p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div className="bg-white rounded-lg shadow-md p-6">
