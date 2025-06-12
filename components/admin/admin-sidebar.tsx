@@ -1,9 +1,6 @@
-"use client"
 
 import { useState } from "react"
-import Link from "next/link"
-import { usePathname, useRouter } from "next/navigation"
-import { createClient } from "@/lib/supabase/client"
+import { Link, useLocation, useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import {
@@ -34,13 +31,11 @@ const navigation = [
 
 export default function AdminSidebar() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const pathname = usePathname()
-  const router = useRouter()
-  const supabase = createClient()
+  const location = useLocation()
+  const navigate = useNavigate()
 
   const handleLogout = async () => {
-    await supabase.auth.signOut()
-    router.push("/admin-login")
+    navigate("/admin-login")
   }
 
   return (
@@ -51,7 +46,7 @@ export default function AdminSidebar() {
         <div className="fixed inset-y-0 left-0 flex w-64 flex-col bg-white">
           <SidebarContent
             navigation={navigation}
-            pathname={pathname}
+            pathname={location.pathname}
             onLogout={handleLogout}
             onClose={() => setSidebarOpen(false)}
           />
@@ -60,7 +55,7 @@ export default function AdminSidebar() {
 
       {/* Desktop sidebar */}
       <div className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0">
-        <SidebarContent navigation={navigation} pathname={pathname} onLogout={handleLogout} />
+        <SidebarContent navigation={navigation} pathname={location.pathname} onLogout={handleLogout} />
       </div>
 
       {/* Mobile menu button */}
@@ -104,7 +99,7 @@ function SidebarContent({
           return (
             <Link
               key={item.name}
-              href={item.href}
+              to={item.href}
               onClick={onClose}
               className={cn(
                 "group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors",

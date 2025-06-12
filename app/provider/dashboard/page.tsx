@@ -1,28 +1,25 @@
-import { redirect } from "next/navigation"
-import { createServerClient } from "@/lib/supabase/server"
 
-export default async function ProviderDashboardPage() {
-  const supabase = createServerClient()
+import React from "react"
+import { Navigate } from "react-router-dom"
+import { useTestAuth } from "@/lib/test-auth-context"
+
+export default function ProviderDashboardPage() {
+  const { user } = useTestAuth()
 
   // Check authentication
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
-  if (!session) {
-    redirect("/login")
+  if (!user) {
+    return <Navigate to="/login" replace />
   }
 
   // Check user role
-  const { data: profile } = await supabase.from("profiles").select("role, full_name").eq("id", session.user.id).single()
-
-  if (profile?.role !== "provider") {
-    redirect("/unauthorized")
+  if (user.role !== "mess-provider") {
+    return <Navigate to="/unauthorized" replace />
   }
 
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-6">Provider Dashboard</h1>
-      <p className="mb-4">Welcome, {profile.full_name}!</p>
+      <p className="mb-4">Welcome, {user.name}!</p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div className="bg-white rounded-lg shadow-md p-6">
