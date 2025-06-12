@@ -15,7 +15,7 @@ export function ProviderBottomNavigation({ activeTab = "home" }: ProviderBottomN
   const tabs = [
     {
       name: "home",
-      href: "/provider/home",
+      href: "/provider-dashboard",
       label: "Home",
       icon: Home,
     },
@@ -56,9 +56,9 @@ export function ProviderBottomNavigation({ activeTab = "home" }: ProviderBottomN
             <Button
               key={tab.name}
               variant="ghost"
-              className={`flex flex-col items-center justify-center w-full h-full bottom-nav-item ${
+              className={`flex flex-col items-center justify-center w-full h-full ${
                 isActive 
-                  ? "text-zomato-red active" 
+                  ? "text-zomato-red" 
                   : "text-gray-500 hover:text-gray-700"
               }`}
               onClick={() => navigate(tab.href)}
