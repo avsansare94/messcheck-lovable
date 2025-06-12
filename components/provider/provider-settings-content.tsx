@@ -42,34 +42,34 @@ export function ProviderSettingsContent() {
       {/* Settings menu items */}
       {menuItems.map((item) => (
         <Link to={item.path} key={item.path}>
-          <div className="bg-white rounded-lg shadow-sm border border-zomato-gray-200 p-4 flex items-center justify-between hover:bg-zomato-gray-50 transition-colors">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-zomato-orange/10 flex items-center justify-center text-zomato-orange">
+              <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-600">
                 {item.icon}
               </div>
               <div>
-                <h3 className="font-semibold text-zomato-gray-900">{item.title}</h3>
-                <p className="text-sm text-zomato-gray-500">{item.description}</p>
+                <h3 className="font-semibold text-gray-900">{item.title}</h3>
+                <p className="text-sm text-gray-500">{item.description}</p>
               </div>
             </div>
-            <ChevronRight className="h-5 w-5 text-zomato-gray-400" />
+            <ChevronRight className="h-5 w-5 text-gray-400" />
           </div>
         </Link>
       ))}
 
       {/* Logout item with special styling */}
       <Link to="/provider/settings/logout">
-        <div className="bg-white rounded-lg shadow-sm border border-zomato-gray-200 p-4 flex items-center justify-between hover:bg-red-50 transition-colors">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex items-center justify-between hover:bg-red-50 transition-colors">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center text-red-500">
               <LogOut className="h-5 w-5" />
             </div>
             <div>
               <h3 className="font-semibold text-red-600">Logout</h3>
-              <p className="text-sm text-zomato-gray-500">Securely log out of your MessCheck provider account</p>
+              <p className="text-sm text-gray-500">Securely log out of your MessCheck provider account</p>
             </div>
           </div>
-          <ChevronRight className="h-5 w-5 text-zomato-gray-400" />
+          <ChevronRight className="h-5 w-5 text-gray-400" />
         </div>
       </Link>
     </div>
