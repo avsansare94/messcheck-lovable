@@ -1,242 +1,161 @@
 
-import { useState, useEffect } from "react"
+import React from "react"
 import { useNavigate } from "react-router-dom"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Separator } from "@/components/ui/separator"
-import { Switch } from "@/components/ui/switch"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Award, LogOut, ChevronRight } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { useTestAuth } from "@/lib/test-auth-context"
+import { 
+  User, 
+  Mail, 
+  Phone, 
+  MapPin, 
+  Star, 
+  Heart, 
+  Calendar,
+  Settings,
+  LogOut,
+  Edit
+} from "lucide-react"
 
 export function ProfileScreen() {
   const navigate = useNavigate()
-  const [loading, setLoading] = useState(true)
-  const [userData, setUserData] = useState({
-    name: "Avinash Sansare",
-    email: "avinash.s@example.com",
-    institution: "ABC Engineering College",
-    accommodation: "PG Hostel Block C",
-    foodPreference: "Veg",
-  })
-
-  useEffect(() => {
-    // Simulate data loading
-    const timer = setTimeout(() => {
-      setLoading(false)
-    }, 1000)
-    return () => clearTimeout(timer)
-  }, [])
+  const { user, logout } = useTestAuth()
 
   const handleLogout = () => {
-    // Clear local storage
-    localStorage.removeItem("userRole")
-    localStorage.removeItem("userData")
-
-    // Redirect to role selection
+    logout()
     navigate("/")
   }
 
+  const userStats = {
+    totalOrders: 45,
+    favoriteMessCount: 12,
+    reviewsCount: 8,
+    memberSince: "Jan 2024"
+  }
+
   return (
-    <div className="container max-w-md mx-auto px-4 py-6">
-      <header className="mb-6">
-        <h1 className="text-2xl font-bold text-orange-600">Profile</h1>
-        <p className="text-sm text-gray-500">Manage your account</p>
-      </header>
-
-      {loading ? (
-        <ProfileSkeleton />
-      ) : (
-        <>
-          <Card className="mb-6">
-            <CardHeader className="pb-2">
-              <div className="flex items-center">
-                <div className="w-16 h-16 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 text-xl font-medium mr-4">
-                  AS
-                </div>
-                <div>
-                  <CardTitle>{userData.name}</CardTitle>
-                  <CardDescription>{userData.email}</CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Full Name</Label>
-                <div className="flex gap-2">
-                  <Input id="name" value={userData.name} readOnly className="bg-gray-50" />
-                  <Button variant="outline" size="icon" className="shrink-0">
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <div className="flex gap-2">
-                  <Input id="email" value={userData.email} readOnly className="bg-gray-50" />
-                  <Button variant="outline" size="icon" className="shrink-0">
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="institution">College/Company</Label>
-                <div className="flex gap-2">
-                  <Input id="institution" value={userData.institution} readOnly className="bg-gray-50" />
-                  <Button variant="outline" size="icon" className="shrink-0">
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="accommodation">Hostel/PG</Label>
-                <div className="flex gap-2">
-                  <Input id="accommodation" value={userData.accommodation} readOnly className="bg-gray-50" />
-                  <Button variant="outline" size="icon" className="shrink-0">
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="food-preference">Food Preference</Label>
-                <div className="flex gap-2">
-                  <Input id="food-preference" value={userData.foodPreference} readOnly className="bg-gray-50" />
-                  <Button variant="outline" size="icon" className="shrink-0">
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle className="text-lg">Notifications</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label htmlFor="meal-reminder">Meal Reminders</Label>
-                  <p className="text-sm text-muted-foreground">Get notified before meal times</p>
-                </div>
-                <Switch id="meal-reminder" defaultChecked />
-              </div>
-
-              <Separator />
-
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label htmlFor="new-mess">New Mess Alerts</Label>
-                  <p className="text-sm text-muted-foreground">Get notified when new messes are added near you</p>
-                </div>
-                <Switch id="new-mess" defaultChecked />
-              </div>
-
-              <Separator />
-
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label htmlFor="marketing">Marketing Emails</Label>
-                  <p className="text-sm text-muted-foreground">Receive emails about new features and offers</p>
-                </div>
-                <Switch id="marketing" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle className="text-lg">Become an Ambassador</CardTitle>
-              <CardDescription>Help us grow MessCheck in your college and earn rewards</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-500 mb-4">
-                As a Campus Ambassador, you'll help spread the word about MessCheck, onboard new mess providers, and
-                help fellow students find the best mess options.
-              </p>
-              <Button className="w-full bg-orange-600 hover:bg-orange-700">
-                <Award className="mr-2 h-4 w-4" /> Apply Now
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Button
-            variant="outline"
-            className="w-full border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
-            onClick={handleLogout}
+    <div className="min-h-screen bg-gradient-to-br from-zomato-gray-100 to-white">
+      <div className="max-w-md mx-auto px-4 py-6">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-display font-bold text-zomato-gray-900">Profile</h1>
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={() => navigate("/settings")}
+            className="text-zomato-gray-600 hover:text-zomato-red"
           >
-            <LogOut className="mr-2 h-4 w-4" /> Logout
+            <Settings className="h-5 w-5" />
           </Button>
-        </>
-      )}
+        </div>
+
+        {/* Profile Card */}
+        <Card className="zomato-card mb-6">
+          <CardContent className="p-6">
+            <div className="flex items-center space-x-4 mb-4">
+              <Avatar className="h-16 w-16">
+                <AvatarImage src="/placeholder-user.jpg" />
+                <AvatarFallback className="bg-zomato-red text-white text-lg">
+                  {user?.email?.charAt(0).toUpperCase() || 'U'}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1">
+                <h2 className="text-xl font-display font-semibold text-zomato-gray-900">
+                  {user?.email?.split('@')[0] || 'User'}
+                </h2>
+                <p className="text-zomato-gray-500">{user?.email}</p>
+                <Badge 
+                  variant="outline" 
+                  className="mt-1 bg-zomato-red/10 text-zomato-red border-zomato-red/20"
+                >
+                  {user?.role === 'mess-user' ? 'Mess User' : user?.role}
+                </Badge>
+              </div>
+              <Button variant="ghost" size="sm" className="text-zomato-gray-600">
+                <Edit className="h-4 w-4" />
+              </Button>
+            </div>
+            
+            {/* Contact Info */}
+            <div className="space-y-3">
+              <div className="flex items-center text-sm text-zomato-gray-600">
+                <Mail className="h-4 w-4 mr-2" />
+                <span>{user?.email}</span>
+              </div>
+              <div className="flex items-center text-sm text-zomato-gray-600">
+                <Phone className="h-4 w-4 mr-2" />
+                <span>+91 98765 43210</span>
+              </div>
+              <div className="flex items-center text-sm text-zomato-gray-600">
+                <MapPin className="h-4 w-4 mr-2" />
+                <span>Mumbai, Maharashtra</span>
+              </div>
+              <div className="flex items-center text-sm text-zomato-gray-600">
+                <Calendar className="h-4 w-4 mr-2" />
+                <span>Member since {userStats.memberSince}</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          <Card className="zomato-card text-center">
+            <CardContent className="p-4">
+              <div className="w-10 h-10 bg-zomato-red/10 rounded-full flex items-center justify-center mx-auto mb-2">
+                <Star className="h-5 w-5 text-zomato-red" />
+              </div>
+              <p className="text-2xl font-bold text-zomato-gray-900">{userStats.totalOrders}</p>
+              <p className="text-xs text-zomato-gray-500">Total Orders</p>
+            </CardContent>
+          </Card>
+          
+          <Card className="zomato-card text-center">
+            <CardContent className="p-4">
+              <div className="w-10 h-10 bg-zomato-orange/10 rounded-full flex items-center justify-center mx-auto mb-2">
+                <Heart className="h-5 w-5 text-zomato-orange" />
+              </div>
+              <p className="text-2xl font-bold text-zomato-gray-900">{userStats.favoriteMessCount}</p>
+              <p className="text-xs text-zomato-gray-500">Favorites</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Quick Actions */}
+        <Card className="zomato-card mb-6">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg font-display">Quick Actions</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start text-left"
+              onClick={() => navigate("/settings")}
+            >
+              <Settings className="h-5 w-5 mr-3 text-zomato-gray-600" />
+              <span>Account Settings</span>
+            </Button>
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start text-left"
+              onClick={() => navigate("/my-mess")}
+            >
+              <Heart className="h-5 w-5 mr-3 text-zomato-gray-600" />
+              <span>My Favorite Messes</span>
+            </Button>
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start text-left text-red-600 hover:text-red-700 hover:bg-red-50"
+              onClick={handleLogout}
+            >
+              <LogOut className="h-5 w-5 mr-3" />
+              <span>Logout</span>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
     </div>
-  )
-}
-
-function ProfileSkeleton() {
-  return (
-    <>
-      <Card className="mb-6">
-        <CardHeader className="pb-2">
-          <div className="flex items-center">
-            <Skeleton className="w-16 h-16 rounded-full mr-4" />
-            <div>
-              <Skeleton className="h-6 w-32 mb-2" />
-              <Skeleton className="h-4 w-40" />
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="space-y-2">
-              <Skeleton className="h-4 w-24" />
-              <div className="flex gap-2">
-                <Skeleton className="h-10 w-full rounded-md" />
-                <Skeleton className="h-10 w-10 rounded-md" />
-              </div>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
-
-      <Card className="mb-6">
-        <CardHeader>
-          <Skeleton className="h-6 w-32 mb-2" />
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {[1, 2, 3].map((i) => (
-            <div key={i}>
-              <div className="flex items-center justify-between mb-4">
-                <div className="space-y-0.5">
-                  <Skeleton className="h-4 w-32 mb-1" />
-                  <Skeleton className="h-3 w-48" />
-                </div>
-                <Skeleton className="h-6 w-12 rounded-full" />
-              </div>
-              {i < 3 && <Skeleton className="h-px w-full" />}
-            </div>
-          ))}
-        </CardContent>
-      </Card>
-
-      <Card className="mb-6">
-        <CardHeader>
-          <Skeleton className="h-6 w-48 mb-2" />
-          <Skeleton className="h-4 w-full" />
-        </CardHeader>
-        <CardContent>
-          <Skeleton className="h-4 w-full mb-2" />
-          <Skeleton className="h-4 w-full mb-4" />
-          <Skeleton className="h-10 w-full rounded-md" />
-        </CardContent>
-      </Card>
-
-      <Skeleton className="h-10 w-full rounded-md" />
-    </>
   )
 }
