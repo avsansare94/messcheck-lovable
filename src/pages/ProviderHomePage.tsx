@@ -1,12 +1,12 @@
 
 import React from "react"
-import { ProviderDashboard } from "@/components/provider-dashboard"
+import { ProviderHomeScreen } from "@/components/provider-home-screen"
 import { ProviderBottomNavigation } from "@/components/provider-bottom-navigation"
 
 export default function ProviderHomePage() {
   return (
     <main className="pb-16">
-      <ProviderDashboard />
+      <ProviderHomeScreen />
       <ProviderBottomNavigation activeTab="home" />
     </main>
   )

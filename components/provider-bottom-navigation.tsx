@@ -15,7 +15,7 @@ export function ProviderBottomNavigation({ activeTab = "home" }: ProviderBottomN
   const tabs = [
     {
       name: "home",
-      href: "/provider-dashboard",
+      href: "/provider/home",
       label: "Home",
       icon: Home,
     },

@@ -19,7 +19,7 @@ import ScannerPage from './pages/ScannerPage'
 import AdminDashboardPage from './pages/AdminDashboardPage'
 import UserDashboardPage from './pages/UserDashboardPage'
 import ProviderHomePage from './pages/ProviderHomePage'
-import ProviderDashboardPage from './pages/ProviderDashboardPage'
+// ProviderDashboardPage removed
 import ProviderManagePage from './pages/ProviderManagePage'
 import ProviderSubscriptionPage from './pages/ProviderSubscriptionPage'
 import ProviderCheckinPage from './pages/ProviderCheckinPage'
@@ -45,7 +45,7 @@ function App() {
           <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
           <Route path="/user/dashboard" element={<UserDashboardPage />} />
           <Route path="/provider/home" element={<ProviderHomePage />} />
-          <Route path="/provider/dashboard" element={<ProviderDashboardPage />} />
+          <Route path="/provider/dashboard" element={<Navigate to="/provider/home" replace />} />
           <Route path="/provider/manage" element={<ProviderManagePage />} />
           <Route path="/provider/subscription" element={<ProviderSubscriptionPage />} />
           <Route path="/provider/checkin" element={<ProviderCheckinPage />} />
