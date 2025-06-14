@@ -1,5 +1,6 @@
+
 import type React from "react"
-import Link from "next/link"
+import { Link } from "react-router-dom"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 
@@ -26,47 +27,47 @@ export function PromotionalCard({
   buttonStyle = "default",
   shadow = "none",
 }: PromotionalCardProps) {
-  // Define color schemes
+  // Define color schemes with Zomato-inspired colors
   const colorSchemes = {
-    accent: "bg-gradient-to-br from-red-50 to-red-100 border-red-200",
-    soft: "bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200",
-    default: "bg-white border-gray-200",
+    accent: "bg-gradient-to-br from-zomato-red/10 to-zomato-red/20 border-zomato-red/30",
+    soft: "bg-gradient-to-br from-zomato-gray-50 to-zomato-gray-100 border-zomato-gray-200",
+    default: "bg-white border-zomato-gray-200",
   }
 
-  // Define button styles
+  // Define button styles with Zomato colors
   const buttonStyles = {
-    primary: "bg-red-600 hover:bg-red-700 text-white",
-    outline: "border-red-200 text-red-600 hover:bg-red-50",
+    primary: "bg-zomato-red hover:bg-zomato-red-dark text-white shadow-zomato",
+    outline: "border-zomato-red/30 text-zomato-red hover:bg-zomato-red/5",
     default: "",
   }
 
   // Define shadow styles
   const shadowStyles = {
-    soft: "shadow-md",
+    soft: "shadow-card hover:shadow-card-hover",
     none: "",
   }
 
   return (
-    <Card className={`overflow-hidden ${colorSchemes[colorScheme]} ${shadowStyles[shadow]} border rounded-lg`}>
-      <CardHeader className="pb-2 pt-4">
-        <div className="flex items-start gap-3">
-          {icon && <div className="text-2xl flex-shrink-0 mt-1">{icon}</div>}
+    <Card className={`overflow-hidden transition-all duration-300 ${colorSchemes[colorScheme]} ${shadowStyles[shadow]} border rounded-xl`}>
+      <CardHeader className="pb-3 pt-6">
+        <div className="flex items-start gap-4">
+          {icon && <div className="text-3xl flex-shrink-0 mt-1">{icon}</div>}
           <div>
-            <h3 className="text-lg font-semibold">{title}</h3>
-            {subtitle && <p className="text-sm text-gray-600">{subtitle}</p>}
+            <h3 className="text-lg font-semibold text-zomato-gray-800 font-display">{title}</h3>
+            {subtitle && <p className="text-sm text-zomato-gray-600 mt-1">{subtitle}</p>}
           </div>
         </div>
       </CardHeader>
-      <CardContent className="pb-2">
+      <CardContent className="pb-4">
         {typeof description === "string" ? (
-          <div className="text-sm text-gray-600 whitespace-pre-line">{description}</div>
+          <div className="text-sm text-zomato-gray-600 whitespace-pre-line leading-relaxed">{description}</div>
         ) : (
           description
         )}
       </CardContent>
-      <CardFooter className="pt-2 pb-4">
-        <Button asChild className={buttonStyles[buttonStyle]}>
-          <Link href={ctaTarget}>{ctaText}</Link>
+      <CardFooter className="pt-2 pb-6">
+        <Button asChild className={`transition-all duration-200 ${buttonStyles[buttonStyle]}`}>
+          <Link to={ctaTarget}>{ctaText}</Link>
         </Button>
       </CardFooter>
     </Card>
