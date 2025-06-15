@@ -1,5 +1,5 @@
 
-import type React from "react"
+import React from "react"
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -25,11 +25,10 @@ export function ProviderHomeScreen() {
       isVerified: true,
       contactNumber: "+91 98765 43210",
     },
-    adStatus: "pending", // pending, approved, rejected
+    adStatus: "pending" as "pending" | "approved" | "rejected",
   })
 
   useEffect(() => {
-    // Simulate data loading
     const timer = setTimeout(() => {
       setLoading(false)
     }, 1000)
@@ -61,7 +60,6 @@ export function ProviderHomeScreen() {
               icon={<Users className="h-5 w-5" />}
               bgColor="from-blue-500 to-blue-600"
               textColor="text-blue-600"
-              bgAccent="bg-blue-50"
             />
             <KPICard
               title="Lunch Check-ins"
@@ -69,7 +67,6 @@ export function ProviderHomeScreen() {
               icon={<Coffee className="h-5 w-5" />}
               bgColor="from-zomato-orange to-zomato-orange-light"
               textColor="text-zomato-orange"
-              bgAccent="bg-orange-50"
             />
             <KPICard
               title="Dinner Check-ins"
@@ -77,7 +74,6 @@ export function ProviderHomeScreen() {
               icon={<Moon className="h-5 w-5" />}
               bgColor="from-indigo-500 to-purple-600"
               textColor="text-indigo-600"
-              bgAccent="bg-indigo-50"
             />
             <KPICard
               title="Off Days Today"
@@ -85,7 +81,6 @@ export function ProviderHomeScreen() {
               icon={<Coffee className="h-5 w-5" />}
               bgColor="from-red-500 to-red-600"
               textColor="text-red-600"
-              bgAccent="bg-red-50"
             />
             <KPICard
               title="Average Rating"
@@ -93,7 +88,6 @@ export function ProviderHomeScreen() {
               icon={<Star className="h-5 w-5" />}
               bgColor="from-yellow-400 to-yellow-500"
               textColor="text-yellow-600"
-              bgAccent="bg-yellow-50"
             />
             <KPICard
               title="Monthly Sales"
@@ -101,7 +95,6 @@ export function ProviderHomeScreen() {
               icon={<TrendingUp className="h-5 w-5" />}
               bgColor="from-green-500 to-green-600"
               textColor="text-green-600"
-              bgAccent="bg-green-50"
               prefix="₹"
             />
           </div>
@@ -193,7 +186,6 @@ function KPICard({
   icon,
   bgColor,
   textColor,
-  bgAccent,
   prefix = "",
   suffix = "",
 }: {
@@ -202,7 +194,6 @@ function KPICard({
   icon: React.ReactNode
   bgColor: string
   textColor: string
-  bgAccent: string
   prefix?: string
   suffix?: string
 }) {

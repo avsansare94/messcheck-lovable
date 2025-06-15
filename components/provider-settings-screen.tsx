@@ -1,14 +1,12 @@
 
 import React from "react"
 import { useNavigate } from "react-router-dom"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Home, Bell, CreditCard, Globe, HelpCircle, LogOut, ChevronRight } from "lucide-react"
 
 export function ProviderSettingsScreen() {
   const navigate = useNavigate()
 
-  // Settings menu items
   const menuItems = [
     {
       icon: <Home className="h-5 w-5" />,
@@ -50,7 +48,6 @@ export function ProviderSettingsScreen() {
       </header>
 
       <div className="space-y-3">
-        {/* Settings menu items */}
         {menuItems.map((item, index) => (
           <Card 
             key={item.path} 
@@ -73,7 +70,6 @@ export function ProviderSettingsScreen() {
           </Card>
         ))}
 
-        {/* Logout item with special styling */}
         <Card 
           className="bg-white border-zomato-gray-100 shadow-card hover:shadow-card-hover transition-all duration-200 cursor-pointer hover:bg-red-50 animate-fade-in"
           style={{ animationDelay: `${menuItems.length * 100}ms` }}

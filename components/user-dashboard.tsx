@@ -1,73 +1,21 @@
 
-import React, { useState, useEffect } from "react"
-import { useNavigate } from "react-router-dom"
+import React from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Skeleton } from "@/components/ui/skeleton"
-import { 
-  MapPin, 
-  Star, 
-  Clock, 
-  Users, 
-  Coffee, 
-  Moon, 
-  Search,
-  TrendingUp,
-  Heart,
-  CheckCircle
-} from "lucide-react"
+import { PromotionalCard } from "@/components/promotional-card"
+import { QrCode, Star, Clock, MapPin, Coffee, Users, TrendingUp, ChefHat } from "lucide-react"
 
 export function UserDashboard() {
-  const navigate = useNavigate()
-  const [loading, setLoading] = useState(true)
-  const [userData, setUserData] = useState({
-    activeSubscriptions: 2,
-    todayMeals: { lunch: true, dinner: false },
-    favoriteMessCount: 5,
-    totalCheckins: 247,
-    nearbyMess: [
-      {
-        id: 1,
-        name: "Sharma's Tiffin Service",
-        cuisine: "North Indian",
-        rating: 4.3,
-        distance: "0.2 km",
-        price: "₹120/meal",
-        isVeg: true,
-        image: "/placeholder.jpg"
-      },
-      {
-        id: 2,
-        name: "South Indian Express",
-        cuisine: "South Indian",
-        rating: 4.1,
-        distance: "0.5 km",
-        price: "₹100/meal",
-        isVeg: true,
-        image: "/placeholder.jpg"
-      }
-    ]
-  })
-
-  useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 1000)
-    return () => clearTimeout(timer)
-  }, [])
-
-  if (loading) {
-    return <DashboardSkeleton />
-  }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-zomato-gray-50 to-white">
-      <div className="container max-w-md mx-auto px-4 py-6">
+      <div className="container max-w-md mx-auto px-4 py-6 pb-20">
         {/* Header */}
         <header className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h1 className="text-2xl font-bold text-zomato-gray-900 font-display">Good Morning!</h1>
-              <p className="text-zomato-gray-600">Ready for your delicious meals today?</p>
+              <h1 className="text-2xl font-bold text-zomato-gray-900 font-display">Good Evening!</h1>
+              <p className="text-zomato-gray-600">Ready for dinner?</p>
             </div>
             <div className="w-12 h-12 bg-gradient-to-br from-zomato-red to-zomato-red-dark rounded-xl flex items-center justify-center shadow-zomato">
               <Coffee className="h-6 w-6 text-white" />
@@ -75,238 +23,131 @@ export function UserDashboard() {
           </div>
         </header>
 
-        {/* Quick Stats */}
-        <div className="grid grid-cols-2 gap-4 mb-8">
-          <StatsCard
-            title="Active Plans"
-            value={userData.activeSubscriptions}
-            icon={<CheckCircle className="h-5 w-5" />}
-            bgColor="from-green-500 to-green-600"
-            textColor="text-green-600"
-          />
-          <StatsCard
-            title="Total Check-ins"
-            value={userData.totalCheckins}
-            icon={<TrendingUp className="h-5 w-5" />}
-            bgColor="from-blue-500 to-blue-600"
-            textColor="text-blue-600"
-          />
-          <StatsCard
-            title="Favorites"
-            value={userData.favoriteMessCount}
-            icon={<Heart className="h-5 w-5" />}
-            bgColor="from-pink-500 to-pink-600"
-            textColor="text-pink-600"
-          />
-          <StatsCard
-            title="Today's Meals"
-            value={`${userData.todayMeals.lunch ? 1 : 0}/${userData.todayMeals.dinner ? 2 : 1}`}
-            icon={<Coffee className="h-5 w-5" />}
-            bgColor="from-zomato-orange to-zomato-orange-light"
-            textColor="text-zomato-orange"
-          />
-        </div>
-
-        {/* Today's Meals */}
-        <Card className="mb-6 border-zomato-gray-100 shadow-card hover:shadow-card-hover transition-all duration-300">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg font-display text-zomato-gray-900">Today's Meals</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-4">
-              <MealCard
-                type="Lunch"
-                time="12:00 PM - 2:00 PM"
-                status={userData.todayMeals.lunch ? "completed" : "pending"}
-                icon={<Coffee className="h-5 w-5" />}
-              />
-              <MealCard
-                type="Dinner"
-                time="7:00 PM - 9:00 PM"
-                status={userData.todayMeals.dinner ? "completed" : "pending"}
-                icon={<Moon className="h-5 w-5" />}
-              />
-            </div>
-          </CardContent>
-        </Card>
-
         {/* Quick Actions */}
-        <Card className="mb-6 border-zomato-gray-100 shadow-card">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg font-display text-zomato-gray-900">Quick Actions</CardTitle>
-          </CardHeader>
-          <CardContent className="grid grid-cols-2 gap-3">
-            <Button 
-              variant="outline" 
-              className="h-auto p-4 flex flex-col items-center gap-2 border-zomato-gray-200 hover:bg-zomato-red/5 hover:border-zomato-red/30"
-              onClick={() => navigate("/explore")}
-            >
-              <Search className="h-6 w-6 text-zomato-red" />
-              <span className="text-sm font-medium">Find Mess</span>
-            </Button>
-            <Button 
-              variant="outline" 
-              className="h-auto p-4 flex flex-col items-center gap-2 border-zomato-gray-200 hover:bg-zomato-red/5 hover:border-zomato-red/30"
-              onClick={() => navigate("/scanner")}
-            >
-              <MapPin className="h-6 w-6 text-zomato-red" />
-              <span className="text-sm font-medium">Check In</span>
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* Nearby Mess */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-zomato-gray-900 font-display">Nearby Mess</h2>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="text-zomato-red hover:text-zomato-red-dark"
-              onClick={() => navigate("/explore")}
-            >
-              View All
-            </Button>
-          </div>
-          <div className="space-y-3">
-            {userData.nearbyMess.map((mess, index) => (
-              <MessCard key={mess.id} mess={mess} index={index} />
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function StatsCard({ title, value, icon, bgColor, textColor }: {
-  title: string
-  value: number | string
-  icon: React.ReactNode
-  bgColor: string
-  textColor: string
-}) {
-  return (
-    <Card className="border-zomato-gray-100 shadow-card hover:shadow-card-hover transition-all duration-300 hover:scale-105">
-      <CardContent className="p-4">
-        <div className="flex flex-col items-center text-center">
-          <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${bgColor} flex items-center justify-center mb-3 shadow-lg`}>
-            <div className="text-white">{icon}</div>
-          </div>
-          <p className="text-sm text-zomato-gray-600 mb-1 font-medium">{title}</p>
-          <p className={`text-xl font-bold ${textColor} font-display`}>{value}</p>
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
-
-function MealCard({ type, time, status, icon }: {
-  type: string
-  time: string
-  status: "completed" | "pending"
-  icon: React.ReactNode
-}) {
-  return (
-    <div className={`p-4 rounded-xl border-2 transition-all duration-200 ${
-      status === "completed" 
-        ? "border-green-200 bg-green-50" 
-        : "border-zomato-gray-200 bg-zomato-gray-50"
-    }`}>
-      <div className="flex items-center gap-3 mb-2">
-        <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-          status === "completed" ? "bg-green-100 text-green-600" : "bg-zomato-gray-200 text-zomato-gray-600"
-        }`}>
-          {icon}
-        </div>
-        <div>
-          <h3 className="font-semibold text-zomato-gray-900">{type}</h3>
-          <p className="text-xs text-zomato-gray-600">{time}</p>
-        </div>
-      </div>
-      <Badge 
-        variant="outline" 
-        className={`text-xs ${
-          status === "completed" 
-            ? "bg-green-100 text-green-700 border-green-200" 
-            : "bg-amber-100 text-amber-700 border-amber-200"
-        }`}
-      >
-        {status === "completed" ? "Completed" : "Pending"}
-      </Badge>
-    </div>
-  )
-}
-
-function MessCard({ mess, index }: { mess: any; index: number }) {
-  return (
-    <Card 
-      className="border-zomato-gray-100 shadow-card hover:shadow-card-hover transition-all duration-300 cursor-pointer animate-fade-in"
-      style={{ animationDelay: `${index * 100}ms` }}
-    >
-      <CardContent className="p-4">
-        <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-xl bg-zomato-gray-100 flex items-center justify-center">
-            <Coffee className="h-8 w-8 text-zomato-gray-400" />
-          </div>
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-1">
-              <h3 className="font-semibold text-zomato-gray-900 font-display">{mess.name}</h3>
-              {mess.isVeg && (
-                <div className="w-4 h-4 border-2 border-green-500 rounded flex items-center justify-center">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                </div>
-              )}
-            </div>
-            <div className="flex items-center gap-4 text-sm text-zomato-gray-600">
-              <span className="flex items-center gap-1">
-                <Star className="h-3 w-3 text-yellow-500 fill-current" />
-                {mess.rating}
-              </span>
-              <span className="flex items-center gap-1">
-                <MapPin className="h-3 w-3" />
-                {mess.distance}
-              </span>
-              <span className="font-semibold text-zomato-red">{mess.price}</span>
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
-
-function DashboardSkeleton() {
-  return (
-    <div className="container max-w-md mx-auto px-4 py-6">
-      <div className="mb-8">
-        <Skeleton className="h-8 w-48 mb-2" />
-        <Skeleton className="h-4 w-64" />
-      </div>
-      
-      <div className="grid grid-cols-2 gap-4 mb-8">
-        {[...Array(4)].map((_, i) => (
-          <Card key={i} className="border-zomato-gray-100">
-            <CardContent className="p-4 flex flex-col items-center">
-              <Skeleton className="w-12 h-12 rounded-xl mb-3" />
-              <Skeleton className="h-4 w-16 mb-1" />
-              <Skeleton className="h-6 w-12" />
+        <div className="grid grid-cols-2 gap-4 mb-8">
+          <Card className="border-zomato-gray-100 shadow-card hover:shadow-card-hover transition-all duration-300 hover:scale-105 bg-white">
+            <CardContent className="p-4 text-center">
+              <div className="w-12 h-12 bg-gradient-to-br from-zomato-red to-zomato-red-dark rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg">
+                <QrCode className="h-6 w-6 text-white" />
+              </div>
+              <h3 className="font-semibold text-zomato-gray-900 font-display">Scan QR</h3>
+              <p className="text-sm text-zomato-gray-600 mt-1">Quick check-in</p>
             </CardContent>
           </Card>
-        ))}
+
+          <Card className="border-zomato-gray-100 shadow-card hover:shadow-card-hover transition-all duration-300 hover:scale-105 bg-white">
+            <CardContent className="p-4 text-center">
+              <div className="w-12 h-12 bg-gradient-to-br from-zomato-orange to-zomato-orange-light rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg">
+                <MapPin className="h-6 w-6 text-white" />
+              </div>
+              <h3 className="font-semibold text-zomato-gray-900 font-display">Explore</h3>
+              <p className="text-sm text-zomato-gray-600 mt-1">Find nearby mess</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Current Subscription */}
+        <Card className="mb-6 border-zomato-gray-100 shadow-card hover:shadow-card-hover transition-all duration-300 bg-white">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg font-display text-zomato-gray-900">Your Mess</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex justify-between items-start">
+              <div>
+                <h3 className="font-semibold text-lg text-zomato-gray-900 font-display">Sharma's Tiffin Service</h3>
+                <div className="flex items-center gap-2 mt-2">
+                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 font-medium">
+                    <Star className="h-3 w-3 mr-1 fill-current" /> 4.2
+                  </Badge>
+                  <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 font-medium">
+                    Veg
+                  </Badge>
+                </div>
+                <p className="text-sm text-zomato-gray-600 mt-2">Monthly Plan • 12 days left</p>
+              </div>
+              <Button variant="outline" size="sm" className="border-zomato-gray-200 text-zomato-gray-700 hover:bg-zomato-gray-50">
+                View Details
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Today's Menu */}
+        <Card className="mb-6 border-zomato-gray-100 shadow-card hover:shadow-card-hover transition-all duration-300 bg-white">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg font-display text-zomato-gray-900 flex items-center gap-2">
+              <ChefHat className="h-5 w-5 text-zomato-orange" />
+              Today's Menu
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex justify-between items-center p-3 bg-zomato-gray-50 rounded-lg">
+              <div>
+                <p className="font-medium text-zomato-gray-900">Lunch</p>
+                <p className="text-sm text-zomato-gray-600">Dal Rice, Aloo Sabji, Roti</p>
+              </div>
+              <Badge className="bg-green-100 text-green-800 border-green-200">
+                <Clock className="h-3 w-3 mr-1" /> 12:00 PM
+              </Badge>
+            </div>
+            <div className="flex justify-between items-center p-3 bg-zomato-gray-50 rounded-lg">
+              <div>
+                <p className="font-medium text-zomato-gray-900">Dinner</p>
+                <p className="text-sm text-zomato-gray-600">Rajma Rice, Mix Veg, Chapati</p>
+              </div>
+              <Badge className="bg-blue-100 text-blue-800 border-blue-200">
+                <Clock className="h-3 w-3 mr-1" /> 7:30 PM
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Stats */}
+        <div className="grid grid-cols-3 gap-3 mb-6">
+          <Card className="border-zomato-gray-100 shadow-card bg-white">
+            <CardContent className="p-3 text-center">
+              <div className="text-2xl font-bold text-zomato-red font-display">28</div>
+              <div className="text-xs text-zomato-gray-600">Meals Left</div>
+            </CardContent>
+          </Card>
+          <Card className="border-zomato-gray-100 shadow-card bg-white">
+            <CardContent className="p-3 text-center">
+              <div className="text-2xl font-bold text-green-600 font-display">85%</div>
+              <div className="text-xs text-zomato-gray-600">Attendance</div>
+            </CardContent>
+          </Card>
+          <Card className="border-zomato-gray-100 shadow-card bg-white">
+            <CardContent className="p-3 text-center">
+              <div className="text-2xl font-bold text-blue-600 font-display">₹45</div>
+              <div className="text-xs text-zomato-gray-600">Per Meal</div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Promotional Cards */}
+        <div className="space-y-4">
+          <PromotionalCard
+            title="Invite Friends & Earn"
+            description="Get ₹50 for every friend who joins MessCheck through your referral link!"
+            ctaText="Start Referring"
+            ctaTarget="/referral"
+            icon="🎉"
+            colorScheme="accent"
+            buttonStyle="primary"
+            shadow="soft"
+          />
+
+          <PromotionalCard
+            title="Rate Your Experience"
+            description="Help others discover great mess options by sharing your honest review."
+            ctaText="Write Review"
+            ctaTarget="/review"
+            icon="⭐"
+            colorScheme="soft"
+            buttonStyle="outline"
+          />
+        </div>
       </div>
-      
-      <Card className="mb-6">
-        <CardHeader>
-          <Skeleton className="h-6 w-32" />
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 gap-4">
-            <Skeleton className="h-24 rounded-xl" />
-            <Skeleton className="h-24 rounded-xl" />
-          </div>
-        </CardContent>
-      </Card>
     </div>
   )
 }
