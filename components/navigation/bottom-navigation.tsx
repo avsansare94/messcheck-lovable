@@ -2,7 +2,7 @@
 import React from "react"
 import { useNavigate, useLocation } from "react-router-dom"
 import { Button } from "@/components/ui/button"
-import { Home, Search, User, Settings } from "lucide-react"
+import { Home, Search, User, Settings, Utensils } from "lucide-react"
 
 interface BottomNavigationProps {
   activeTab: string
@@ -15,13 +15,14 @@ export function BottomNavigation({ activeTab }: BottomNavigationProps) {
   const tabs = [
     { id: "home", label: "Home", icon: Home, path: "/" },
     { id: "explore", label: "Explore", icon: Search, path: "/explore" },
+    { id: "my-mess", label: "My Mess", icon: Utensils, path: "/my-mess" },
     { id: "profile", label: "Profile", icon: User, path: "/profile" },
     { id: "settings", label: "Settings", icon: Settings, path: "/settings" }
   ]
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-zomato-gray-200 shadow-lg z-50">
-      <div className="grid grid-cols-4 gap-1 p-2 max-w-md mx-auto">
+      <div className="grid grid-cols-5 gap-1 p-2 max-w-md mx-auto">
         {tabs.map((tab) => {
           const Icon = tab.icon
           const isActive = activeTab === tab.id || location.pathname === tab.path

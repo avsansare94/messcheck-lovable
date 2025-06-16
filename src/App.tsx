@@ -19,12 +19,10 @@ import ScannerPage from './pages/ScannerPage'
 import AdminDashboardPage from './pages/AdminDashboardPage'
 import UserDashboardPage from './pages/UserDashboardPage'
 import ProviderHomePage from './pages/ProviderHomePage'
-// ProviderDashboardPage removed
 import ProviderManagePage from './pages/ProviderManagePage'
 import ProviderSubscriptionPage from './pages/ProviderSubscriptionPage'
 import ProviderCheckinPage from './pages/ProviderCheckinPage'
 import ProviderSettingsPage from './pages/ProviderSettingsPage'
-import UnauthorizedPage from './pages/UnauthorizedPage'
 
 function App() {
   return (
@@ -50,7 +48,6 @@ function App() {
           <Route path="/provider/subscription" element={<ProviderSubscriptionPage />} />
           <Route path="/provider/checkin" element={<ProviderCheckinPage />} />
           <Route path="/provider/settings" element={<ProviderSettingsPage />} />
-          <Route path="/unauthorized" element={<UnauthorizedPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
         <Toaster />
