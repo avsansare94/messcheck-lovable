@@ -1,15 +1,139 @@
 
-import React from "react"
-import { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Users, Coffee, Moon, Star, DollarSign, BadgeCheck, Phone, Megaphone, TrendingUp } from "lucide-react"
 
+type AdStatus = "pending" | "approved" | "rejected"
+
+interface MessStats {
+  activeSubscribers: number
+  lunchCheckins: number
+  dinnerCheckins: number
+  offDays: number
+  averageRating: number
+  monthlySales: number
+}
+
+interface MessInfo {
+  name: string
+  cuisine: string
+  servingType: string
+  isVerified: boolean
+  contactNumber: string
+}
+
+interface MessData {
+  stats: MessStats
+  messInfo: MessInfo
+  adStatus: AdStatus
+}
+
+interface KPICardProps {
+  title: string
+  value: number
+  icon: React.ReactNode
+  bgColor: string
+  textColor: string
+  prefix?: string
+  suffix?: string
+}
+
+function KPICard({
+  title,
+  value,
+  icon,
+  bgColor,
+  textColor,
+  prefix = "",
+  suffix = "",
+}: KPICardProps) {
+  return (
+    <Card className="border-zomato-gray-100 shadow-card hover:shadow-card-hover transition-all duration-300 hover:scale-105 bg-white">
+      <CardContent className="p-4">
+        <div className="flex flex-col items-center text-center">
+          <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${bgColor} flex items-center justify-center mb-3 shadow-lg`}>
+            <div className="text-white">{icon}</div>
+          </div>
+          <p className="text-sm text-zomato-gray-600 mb-2 font-medium">{title}</p>
+          <p className={`text-xl font-bold ${textColor} font-display`}>
+            {prefix}
+            {value}
+            {suffix}
+          </p>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+function KPISkeletons() {
+  return (
+    <div className="grid grid-cols-2 gap-4 mb-8">
+      {[...Array(6)].map((_, i) => (
+        <Card key={i} className="border-zomato-gray-100 shadow-card bg-white">
+          <CardContent className="p-4">
+            <div className="flex flex-col items-center text-center">
+              <Skeleton className="w-12 h-12 rounded-xl mb-3" />
+              <Skeleton className="h-4 w-16 mb-2" />
+              <Skeleton className="h-6 w-12" />
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  )
+}
+
+function MessOverviewSkeleton() {
+  return (
+    <Card className="mb-6 border-zomato-gray-100 shadow-card bg-white">
+      <CardHeader className="pb-3">
+        <Skeleton className="h-6 w-32 mb-1" />
+        <Skeleton className="h-4 w-48" />
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex justify-between items-start">
+          <div>
+            <Skeleton className="h-6 w-48 mb-2" />
+            <div className="flex items-center gap-2 mt-1">
+              <Skeleton className="h-5 w-16 rounded-full" />
+              <Skeleton className="h-5 w-16 rounded-full" />
+              <Skeleton className="h-5 w-24 rounded-full" />
+            </div>
+          </div>
+          <Skeleton className="h-9 w-24 rounded-md" />
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+function AdSkeleton() {
+  return (
+    <Card className="mb-6 border-zomato-gray-100 shadow-card bg-white">
+      <CardHeader className="pb-3">
+        <Skeleton className="h-6 w-40 mb-1" />
+        <Skeleton className="h-4 w-64" />
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-3/4" />
+
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-6 w-32 rounded-full" />
+          <Skeleton className="h-9 w-32 rounded-md" />
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
 export function ProviderHomeScreen() {
   const [loading, setLoading] = useState(true)
-  const [messData, setMessData] = useState({
+  const [messData, setMessData] = useState<MessData>({
     stats: {
       activeSubscribers: 42,
       lunchCheckins: 18,
@@ -25,7 +149,7 @@ export function ProviderHomeScreen() {
       isVerified: true,
       contactNumber: "+91 98765 43210",
     },
-    adStatus: "pending" as "pending" | "approved" | "rejected",
+    adStatus: "pending" as AdStatus,
   })
 
   useEffect(() => {
@@ -177,103 +301,5 @@ export function ProviderHomeScreen() {
         )}
       </div>
     </div>
-  )
-}
-
-function KPICard({
-  title,
-  value,
-  icon,
-  bgColor,
-  textColor,
-  prefix = "",
-  suffix = "",
-}: {
-  title: string
-  value: number
-  icon: React.ReactNode
-  bgColor: string
-  textColor: string
-  prefix?: string
-  suffix?: string
-}) {
-  return (
-    <Card className="border-zomato-gray-100 shadow-card hover:shadow-card-hover transition-all duration-300 hover:scale-105 bg-white">
-      <CardContent className="p-4">
-        <div className="flex flex-col items-center text-center">
-          <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${bgColor} flex items-center justify-center mb-3 shadow-lg`}>
-            <div className="text-white">{icon}</div>
-          </div>
-          <p className="text-sm text-zomato-gray-600 mb-2 font-medium">{title}</p>
-          <p className={`text-xl font-bold ${textColor} font-display`}>
-            {prefix}
-            {value}
-            {suffix}
-          </p>
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
-
-function KPISkeletons() {
-  return (
-    <div className="grid grid-cols-2 gap-4 mb-8">
-      {[...Array(6)].map((_, i) => (
-        <Card key={i} className="border-zomato-gray-100 shadow-card bg-white">
-          <CardContent className="p-4">
-            <div className="flex flex-col items-center text-center">
-              <Skeleton className="w-12 h-12 rounded-xl mb-3" />
-              <Skeleton className="h-4 w-16 mb-2" />
-              <Skeleton className="h-6 w-12" />
-            </div>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  )
-}
-
-function MessOverviewSkeleton() {
-  return (
-    <Card className="mb-6 border-zomato-gray-100 shadow-card bg-white">
-      <CardHeader className="pb-3">
-        <Skeleton className="h-6 w-32 mb-1" />
-        <Skeleton className="h-4 w-48" />
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex justify-between items-start">
-          <div>
-            <Skeleton className="h-6 w-48 mb-2" />
-            <div className="flex items-center gap-2 mt-1">
-              <Skeleton className="h-5 w-16 rounded-full" />
-              <Skeleton className="h-5 w-16 rounded-full" />
-              <Skeleton className="h-5 w-24 rounded-full" />
-            </div>
-          </div>
-          <Skeleton className="h-9 w-24 rounded-md" />
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
-
-function AdSkeleton() {
-  return (
-    <Card className="mb-6 border-zomato-gray-100 shadow-card bg-white">
-      <CardHeader className="pb-3">
-        <Skeleton className="h-6 w-40 mb-1" />
-        <Skeleton className="h-4 w-64" />
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <Skeleton className="h-4 w-full" />
-        <Skeleton className="h-4 w-3/4" />
-
-        <div className="flex items-center justify-between">
-          <Skeleton className="h-6 w-32 rounded-full" />
-          <Skeleton className="h-9 w-32 rounded-md" />
-        </div>
-      </CardContent>
-    </Card>
   )
 }

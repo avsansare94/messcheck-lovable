@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { PromotionalCard } from "@/components/promotional-card"
-import { QrCode, Star, Clock, MapPin, Coffee, Users, TrendingUp, ChefHat } from "lucide-react"
+import { QrCode, Star, Clock, MapPin, Coffee, ChefHat } from "lucide-react"
 
 export function UserDashboard() {
   return (
