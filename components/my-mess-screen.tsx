@@ -184,10 +184,7 @@ export function MyMessScreen() {
         <div className="mb-16">
           <PromotionalCard
             title="Can't Find Your Mess?"
-            subtitle="List the mess where you currently eat so others can discover it too!"
-            description={
-              'If your mess isn\'t listed on MessCheck, you can help the community by adding it.\nOnce listed, it will appear as "Unclaimed" and the provider can claim it later for verification.\n\n🔒 No contact info is required.\n🧑‍🎓 Help fellow students find trusted meals nearby.\n✅ Unclaimed messes are shown publicly right away.'
-            }
+            description="List the mess where you currently eat so others can discover it too! If your mess isn't listed on MessCheck, you can help the community by adding it. Once listed, it will appear as 'Unclaimed' and the provider can claim it later for verification. 🔒 No contact info is required. 🧑‍🎓 Help fellow students find trusted meals nearby. ✅ Unclaimed messes are shown publicly right away."
             ctaText="Add Your Mess"
             ctaTarget="/add-mess"
             icon="🏠"
